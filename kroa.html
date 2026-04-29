@@ -3,65 +3,66 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Kroatisch Master v3.0.0</title>
+<title>Kroatisch Master v3.2.0</title>
 <style>
 :root { --hr-blue: #002395; --bg: #f4f7f6; --red: #ff4444; --green: #28a745; --gold: #f39c12; }
 body { font-family: -apple-system, sans-serif; background: var(--bg); display: flex; flex-direction: column; align-items: center; padding: 10px; margin: 0; }
 .card { max-width: 500px; width: 100%; background: white; padding: 20px; border-radius: 18px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); margin-bottom: 12px; box-sizing: border-box; }
 h2 { color: var(--hr-blue); font-size: 0.85rem; margin: 0 0 12px 0; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid #eee; padding-bottom: 5px; }
-input, select { width: 100%; padding: 14px; border: 2px solid #edf2f7; border-radius: 10px; margin-bottom: 10px; box-sizing: border-box; font-size: 1rem; outline: none; transition: border 0.2s; }
-input:focus { border-color: var(--hr-blue); }
+input, select { width: 100%; padding: 14px; border: 2px solid #edf2f7; border-radius: 10px; margin-bottom: 10px; box-sizing: border-box; font-size: 1rem; outline: none; }
 .btn-group { display: flex; gap: 8px; margin-bottom: 10px; }
-.btn { padding: 14px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; color: white; font-size: 1rem; flex: 1; transition: opacity 0.2s; }
-.btn:active { opacity: 0.7; }
+.btn { padding: 14px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; color: white; font-size: 1rem; flex: 1; -webkit-tap-highlight-color: transparent; }
 .btn-add { background: var(--hr-blue); flex: 2; }
 .btn-check { background: var(--gold); }
 .btn-flash { background: #1a202c; width: 100%; }
 .btn-stop { background: var(--red); display: none; width: 100%; }
 .dict-toggle-btn { background: #edf2f7; color: #4a5568; padding: 12px; border-radius: 10px; text-align: center; cursor: pointer; font-weight: bold; width: 100%; border: 1px solid #e2e8f0; }
 #dictContent { display: none; margin-top: 12px; width: 100%; }
-.cat-head { background: #f7fafc; padding: 8px; font-weight: bold; font-size: 0.75rem; margin-top: 15px; border-radius: 6px; color: #718096; border-left: 4px solid var(--hr-blue); }
+.cat-head { background: #f7fafc; padding: 8px; font-weight: bold; font-size: 0.75rem; margin-top: 15px; border-radius: 6px; color: #718096; border-left: 4px solid var(--hr-blue); display: flex; justify-content: space-between; }
 .entry { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #edf2f7; font-size: 0.95rem; }
-.lvl-tag { font-size: 0.65rem; padding: 3px 7px; border-radius: 12px; background: #ebf8ff; color: #3182ce; font-weight: bold; margin-left: 8px; }
-.del-btn { color: #a0aec0; cursor: pointer; padding: 8px; font-size: 1rem; }
+.lvl-tag { font-size: 0.65rem; padding: 3px 7px; border-radius: 12px; background: #ebf8ff; color: #3182ce; font-weight: bold; }
+.del-btn { color: #a0aec0; cursor: pointer; padding: 8px; }
 .flash-box { height: 160px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
 .flash-hr { font-size: 2.4rem; font-weight: 800; color: var(--hr-blue); margin-bottom: 4px; }
 #solutionDisplay { display: none; color: var(--red); text-align: center; font-weight: bold; margin: 12px 0; background: #fff5f5; padding: 18px; border-radius: 12px; border: 1px solid #feb2b2; }
-.stats-row { display: flex; justify-content: space-between; font-size: 0.75rem; color: #718096; margin-bottom: 10px; }
+.heatmap { display: flex; gap: 3px; margin-top: 5px; height: 10px; }
+.heat-cell { flex: 1; border-radius: 2px; background: #edf2f7; }
+.heat-filled { background: var(--green); }
 </style>
 </head>
 <body>
 
 <div class="card">
 <h2>1. Neuer Eintrag</h2>
-<input type="text" id="hrIn" placeholder="Kroatisch (z.B. Sladoled)">
-<input type="text" id="deIn" placeholder="Deutsch (z.B. Eis)">
+<input type="text" id="hrIn" placeholder="Kroatisch">
+<input type="text" id="deIn" placeholder="Deutsch">
 <select id="catIn">
 <option value="Allgemein">Allgemein</option>
 <option value="Phrasen">Phrasen</option>
 <option value="Urlaub">Urlaub</option>
+<option value="Essen">Essen & Trinken</option>
 </select>
 <div class="btn-group">
 <button type="button" id="btnCheck" class="btn btn-check">🔍 CHECK</button>
 <button type="button" id="btnSave" class="btn btn-add">SPEICHERN</button>
 </div>
-<div id="voice-status" style="font-size:0.7rem; color: #a0aec0;">Initialisiere Audio...</div>
+<div id="voice-status" style="font-size:0.7rem; color: #a0aec0;">Audio bereit (System)</div>
 </div>
 
 <div class="card" id="trainArea" style="display:none;">
-<div class="stats-row">
+<div style="display:flex; justify-content:space-between; font-size:0.7rem; color:#718096; margin-bottom:10px;">
 <span>TRAINING</span>
 <span id="trainStats">Lvl 0</span>
 </div>
 <div id="question" style="font-size:1.6rem; text-align:center; font-weight:800; margin:15px 0;"></div>
 <div id="solutionDisplay"></div>
-<input type="text" id="answer" placeholder="Antwort eingeben..." autocomplete="off">
+<input type="text" id="answer" placeholder="Antwort..." autocomplete="off">
 <div id="feedback" style="text-align:center; height:24px; font-weight:bold; color: var(--green);"></div>
-<button type="button" class="btn" style="background:#718096; margin-top:10px;" id="btnHint">WEISS ICH NICHT</button>
+<button type="button" class="btn" style="background:#718096; margin-top:10px; width:100%;" id="btnHint">WEISS ICH NICHT</button>
 </div>
 
 <div class="card">
-<div class="dict-toggle-btn" id="tBtnLabel">WÖRTERBUCH ANZEIGEN</div>
+<div class="dict-toggle-btn" id="tBtnLabel">WÖRTERBUCH & STATS</div>
 <div id="dictContent"><div id="dictionaryList"></div></div>
 </div>
 
@@ -76,26 +77,24 @@ input:focus { border-color: var(--hr-blue); }
 </div>
 
 <script>
-const STORAGE_KEY = 'kroatisch_master_v3_0';
-let daten = (JSON.parse(localStorage.getItem(STORAGE_KEY)) || []).map(x => ({
-hr: x.hr, de: x.de, cat: x.cat || "Allgemein", lvl: x.lvl || 0
-}));
-
+const STORAGE_KEY = 'kroatisch_master_v3_2';
+let daten = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
 let currentItem = null, currentMode = "", isLocked = false, flashInterval = null, hrVoice = null;
 
-// --- AUDIO SYSTEM (Fix 3: Anti-Spam & Init) ---
+// --- FIX: Robustere Audio-Initialisierung ---
 function initVoices() {
-const loadVoices = () => {
-hrVoice = speechSynthesis.getVoices().find(v => v.lang.toLowerCase().includes('hr'));
-const el = document.getElementById('voice-status');
-if (hrVoice) { el.innerText = "✓ Kroatisch (HD) aktiv" el.style.color = "var(--green)" }
+const setVoice = () => {
+const voices = speechSynthesis.getVoices();
+hrVoice = voices.find(v => v.lang.includes('hr')) || voices.find(v => v.lang.includes('sr'));
+if (hrVoice) document.getElementById('voice-status').innerText = "✓ Kroatisch aktiv"
 };
-loadVoices();
-speechSynthesis.onvoiceschanged = loadVoices;
+setVoice();
+if (speechSynthesis.onvoiceschanged !== undefined) speechSynthesis.onvoiceschanged = setVoice;
 }
 
 function speakHr(text) {
-if (!window.speechSynthesis || speechSynthesis.speaking) return;
+if (!window.speechSynthesis) return;
+speechSynthesis.cancel();
 const msg = new SpeechSynthesisUtterance(text);
 if (hrVoice) msg.voice = hrVoice;
 msg.lang = 'hr-HR';
@@ -103,7 +102,6 @@ msg.rate = 0.85;
 speechSynthesis.speak(msg);
 }
 
-// --- LOGIK & SICHERHEIT (Fix 5 & 6) ---
 function normalize(str) {
 return str.toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d");
 }
@@ -112,12 +110,7 @@ function saveWort() {
 const h = document.getElementById('hrIn').value.trim();
 const d = document.getElementById('deIn').value.trim();
 if (!h || !d) return;
-
-if (daten.some(x => normalize(x.hr) === normalize(h))) {
-alert("Dieses Wort existiert bereits!");
-return;
-}
-
+if (daten.some(x => normalize(x.hr) === normalize(h))) return alert("Existiert bereits");
 daten.push({ hr: h, de: d, cat: document.getElementById('catIn').value, lvl: 0 });
 save();
 document.getElementById('hrIn').value = ""
@@ -128,7 +121,7 @@ checkUI();
 
 function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(daten)); }
 
-// --- RENDERER (Fix 2: XSS Schutz via Event Delegation) ---
+// --- NEU: Statistik & Heatmap ---
 function renderList() {
 const list = document.getElementById('dictionaryList');
 if (!daten.length) { list.innerHTML = "Leer" return; }
@@ -139,11 +132,14 @@ return acc;
 
 let html = ""
 for (let cat in grouped) {
-html += `<div class="cat-head">${cat.toUpperCase()}</div>`;
-grouped[cat].forEach(item => {
+const items = grouped[cat];
+const avgLvl = items.reduce((s, i) => s + (i.lvl || 0), 0) / items.length;
+html += `<div class="cat-head"><span>${cat.toUpperCase()}</span><span>avg. Lvl ${avgLvl.toFixed(1)}</span></div>`;
+html += `<div class="heatmap">${items.map(i => `<div class="heat-cell ${i.lvl > 3 ? 'heat-filled' : ''}"></div>`).join('')}</div>`;
+items.forEach(item => {
 html += `<div class="entry">
 <span class="clickable-hr" data-hr="${encodeURIComponent(item.hr)}">
-<b>${item.hr}</b> - ${item.de} <span class="lvl-tag">Lvl ${item.lvl}</span> 🔊
+<b>${item.hr}</b> - ${item.de} <span class="lvl-tag">Lvl ${item.lvl || 0}</span>
 </span>
 <span class="del-btn" data-idx="${daten.indexOf(item)}">❌</span>
 </div>`;
@@ -152,53 +148,39 @@ html += `<div class="entry">
 list.innerHTML = html;
 }
 
-// --- TRAINING (Fix 4 & 5: Leitner-Light) ---
 function nextQuestion() {
 if (!daten.length) return;
 isLocked = false;
 document.getElementById('solutionDisplay').style.display = 'none';
 document.getElementById('feedback').innerText = ""
-// Gewichtung: Level 5 erscheint fast nie, Level 0 massiv oft
+// Leitner-Gewichtung
 const pool = [];
 daten.forEach(item => {
-if (item.lvl >= 5 && Math.random() > 0.1) return; // 90% Chance, dass Lvl 5 ignoriert wird
-const weight = Math.pow(2, 5 - item.lvl);
+const weight = Math.pow(2, 5 - (item.lvl || 0));
 for(let i=0; i<weight; i++) pool.push(item);
 });
 
-currentItem = pool.length ? pool[Math.floor(Math.random() * pool.length)] : daten[0];
+currentItem = pool[Math.floor(Math.random() * pool.length)];
 currentMode = Math.random() > 0.5 ? "hr" : "de"
 document.getElementById('question').innerText = currentMode === "hr" ? currentItem.de : currentItem.hr;
-document.getElementById('trainStats').innerText = `Level ${currentItem.lvl}`;
+document.getElementById('trainStats').innerText = `Level ${currentItem.lvl || 0}`;
 document.getElementById('answer').value = ""
 document.getElementById('answer').focus();
 }
 
-function updateLvl(success) {
-if (success) {
-if (currentItem.lvl < 5) currentItem.lvl++;
-} else {
-currentItem.lvl = Math.max(0, currentItem.lvl - 2); // Moderaterer Rückfall
-}
-save();
-}
-
 function handleWrong() {
 isLocked = true;
-updateLvl(false);
-const sol = currentMode === "hr" ? currentItem.hr : currentItem.de;
-const sd = document.getElementById('solutionDisplay');
-sd.innerHTML = `Lösung:<br><span style="font-size:1.4rem">${sol}</span>`;
-sd.style.display = 'block';
+currentItem.lvl = Math.max(0, (currentItem.lvl || 0) - 1);
+save();
+document.getElementById('solutionDisplay').innerHTML = `Lösung:<br>${currentMode === "hr" ? currentItem.hr : currentItem.de}`;
+document.getElementById('solutionDisplay').style.display = 'block';
 if (currentMode === "hr") speakHr(currentItem.hr);
-setTimeout(nextQuestion, 2800);
+setTimeout(nextQuestion, 2500);
 }
 
-// --- EVENTS ---
 document.addEventListener("click", e => {
-const speakEl = e.target.closest(".clickable-hr");
-if (speakEl) speakHr(decodeURIComponent(speakEl.dataset.hr));
-
+const hrEl = e.target.closest(".clickable-hr");
+if (hrEl) speakHr(decodeURIComponent(hrEl.dataset.hr));
 const delEl = e.target.closest(".del-btn");
 if (delEl && confirm("Löschen?")) {
 daten.splice(parseInt(delEl.dataset.idx), 1);
@@ -222,24 +204,23 @@ document.getElementById('answer').onkeypress = e => {
 if (e.key === 'Enter' && !isLocked) {
 const cor = currentMode === "hr" ? currentItem.hr : currentItem.de;
 if (normalize(document.getElementById('answer').value) === normalize(cor)) {
-updateLvl(true);
+currentItem.lvl = Math.min(5, (currentItem.lvl || 0) + 1);
+save();
 if (currentMode === "hr") speakHr(currentItem.hr);
-document.getElementById('feedback').innerText = "✓ Gut gemacht!"
+document.getElementById('feedback').innerText = "✓ Richtig!"
 setTimeout(nextQuestion, 900);
 } else { handleWrong(); }
 }
 };
 
-// --- FLASH (Fix 8) ---
 document.getElementById('sBtn').onclick = () => {
 if (!daten.length) return;
 document.getElementById('sBtn').style.display = 'none';
 document.getElementById('stopBtn').style.display = 'block';
 flashInterval = setInterval(() => {
 const r = daten[Math.floor(Math.random() * daten.length)];
-const m = Math.random() > 0.5 ? "hr" : "de"
-document.getElementById('fHr').innerText = m === "hr" ? r.hr : r.de;
-document.getElementById('fDe').innerText = m === "hr" ? r.de : r.hr;
+document.getElementById('fHr').innerText = r.hr;
+document.getElementById('fDe').innerText = r.de;
 speakHr(r.hr);
 }, 2200);
 };
