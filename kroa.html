@@ -3,20 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Kroatisch Master v1.9.2</title>
+<title>Kroatisch Master v1.8.4</title>
 <style>
-:root { --hr-blue: #002395; --bg: #f0f2f5; --red: #ff4444; --green: #28a745; --gold: #f39c12; }
+:root { --hr-blue: #002395; --bg: #f0f2f5; --red: #ff4444; --green: #28a745; }
 body { font-family: sans-serif; background: var(--bg); display: flex; flex-direction: column; align-items: center; padding: 10px; margin: 0; }
 .card { max-width: 500px; width: 100%; background: white; padding: 15px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 10px; box-sizing: border-box; }
 h2 { color: var(--hr-blue); font-size: 0.9rem; margin: 0 0 10px 0; text-transform: uppercase; border-bottom: 1px solid #eee; }
 input, select { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; margin-bottom: 8px; box-sizing: border-box; font-size: 1rem; }
-.btn-group { display: flex; gap: 5px; margin-bottom: 8px; }
-.btn { padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; color: white; font-size: 1rem; }
-.btn-add { background: var(--hr-blue); flex: 2; }
-.btn-check { background: var(--gold); flex: 1; font-size: 0.8rem; }
-.btn-flash { background: #000; width: 100%; }
-.btn-hint { background: #666; width: 100%; }
-.btn-stop { background: var(--red); display: none; width: 100%; }
+.btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; color: white; margin-bottom: 5px; font-size: 1rem; }
+.btn-add { background: var(--hr-blue); }
+.btn-flash { background: #000; }
+.btn-hint { background: #666; }
+.btn-stop { background: var(--red); display: none; }
 .dict-toggle-btn { background: #eee; color: #333; padding: 12px; border-radius: 8px; text-align: center; cursor: pointer; font-weight: bold; width: 100%; border: 1px solid #ccc; box-sizing: border-box; }
 #dictContent { display: none; margin-top: 10px; width: 100%; }
 .dict-list { max-height: 350px; overflow-y: auto; }
@@ -27,26 +25,31 @@ input, select { width: 100%; padding: 12px; border: 2px solid #ddd; border-radiu
 .flash-active { background: #000 !important; color: #fff !important; }
 .flash-hr { font-size: 2.2rem; font-weight: 900; color: var(--hr-blue); }
 #solutionDisplay { display: none; color: var(--red); text-align: center; font-weight: bold; margin: 10px 0; background: #fff0f0; padding: 15px; border-radius: 8px; border: 1px solid var(--red); font-size: 1.1rem; }
+.rescue-link { font-size: 0.7rem; color: blue; text-decoration: underline; cursor: pointer; display: block; text-align: center; margin-top: 10px; }
+/* Neu: Styling für anklickbare Wörter */
+.speak-item { cursor: pointer; display: inline-block; padding: 2px 0; }
+.speak-item:active { background: #f0f0f0; border-radius: 4px; }
 </style>
 </head>
 <body>
 
 <div class="card">
-<h2>1. Eingabe &amp; Check</h2>
+<h2>1. Eingabe &amp; Wörterbuch</h2>
 <input type="text" id="hrIn" placeholder="Kroatisch">
 <input type="text" id="deIn" placeholder="Deutsch">
 <select id="catIn">
 <option value="Allgemein">Allgemein</option>
-<option value="Phrasen">Phrasen / Sätze</option>
 <option value="Zahlen/Tage">Zahlen &amp; Tage</option>
+<option value="Essen/Trinken">Essen &amp; Trinken</option>
+<option value="Verben">Verben</option>
 </select>
-<div class="btn-group">
-<button type="button" id="btnCheck" class="btn btn-check">🔍 CHECK</button>
+<div id="voice-status" style="font-size:0.75rem; margin-bottom:8px; padding:6px; background:#f8f8f8; border-radius:6px;">Stimme wird geprüft...</div>
 <button type="button" id="btnSave" class="btn btn-add">SPEICHERN</button>
-</div>
-<div id="voice-status" style="font-size:0.7rem; margin-bottom:8px; color: #888;">Stimme wird gesucht...</div>
 <div class="dict-toggle-btn" id="tBtnLabel">WÖRTERBUCH ANZEIGEN</div>
-<div id="dictContent"><div id="dictionaryList" class="dict-list"></div></div>
+<div id="dictContent">
+<div id="dictionaryList" class="dict-list"></div>
+<span class="rescue-link" id="btnRescue">Daten-Rettung erzwingen</span>
+</div>
 </div>
 
 <div class="card" id="trainArea" style="display:none;">
@@ -71,119 +74,255 @@ input, select { width: 100%; padding: 12px; border: 2px solid #ddd; border-radiu
 <script>
 var STORAGE_KEY = 'kroatisch_master_final_v1';
 var daten = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-var currentItem = null, currentQuestionMode = "", isLocked = false, flashInterval = null, hrVoice = null;
+var currentItem = null;
+var currentQuestionMode = ""
+var isLocked = false;
+var flashInterval = null;
+var hrVoice = null;
 
 function initVoices() {
-if (!window.speechSynthesis) return;
-var v = window.speechSynthesis.getVoices();
-hrVoice = v.find(x => x.lang.includes('hr'));
+if (!window.speechSynthesis) { return; }
+var voices = window.speechSynthesis.getVoices();
+hrVoice = findHrVoice(voices);
+if (!hrVoice) {
+setTimeout(function() {
+voices = window.speechSynthesis.getVoices();
+hrVoice = findHrVoice(voices);
+showVoiceStatus();
+}, 500);
+}
+showVoiceStatus();
+}
+
+function findHrVoice(voices) {
+for (var i = 0; i < voices.length; i++) {
+var lang = voices[i].lang.replace('_', '-');
+if (lang === 'hr-HR' || lang === 'hr') { return voices[i]; }
+}
+return null;
+}
+
+function showVoiceStatus() {
 var el = document.getElementById('voice-status');
-if(hrVoice) { el.innerText = "✓ Stimme aktiv" el.style.color="green" }
-else { el.innerText = "⚠ Suche läuft/Standard..." }
+if (!el) { return; }
+if (hrVoice) {
+el.style.color = '#28a745';
+el.innerText = '✓ Kroatisch: ' + hrVoice.name;
+} else {
+el.style.color = '#e67e22';
+el.innerText = '⚠ Stimme fehlt (siehe Anleitung)';
+}
 }
 
 function speakHr(text) {
-if (!window.speechSynthesis) return;
-window.speechSynthesis.cancel();
+if (!window.speechSynthesis) { return; }
+window.speechSynthesis.cancel(); // Stoppt laufende Ansagen
 var msg = new SpeechSynthesisUtterance(text);
-if (hrVoice) msg.voice = hrVoice;
+if (hrVoice) {
+msg.voice = hrVoice;
+msg.lang = hrVoice.lang;
+} else {
 msg.lang = 'hr-HR';
+}
 msg.rate = 0.85;
 window.speechSynthesis.speak(msg);
 }
 
-// Verbesserte Check-Funktion
-function onlineCheck() {
-var word = document.getElementById('hrIn').value.trim();
-if (!word) { alert("Bitte kroatisches Wort eingeben"); return; }
-var url = "https://glosbe.com/hr/de/" + encodeURIComponent(word);
-// Versuch 1: Direktes Öffnen
-var win = window.open(url, '_blank');
-// Falls Browser blockiert:
-if(!win || win.closed || typeof win.closed=='undefined') {
-alert("Pop-up blockiert! Bitte erlaube Pop-ups für diese Seite oder klicke den Link manuell.");
+function checkVisibility() {
+if (daten.length > 0) {
+document.getElementById('trainArea').style.display = 'block';
+if (!currentItem) { nextQuestion(); }
+} else {
+document.getElementById('trainArea').style.display = 'none';
 }
+}
+
+function toggleDict() {
+var content = document.getElementById('dictContent');
+var label = document.getElementById('tBtnLabel');
+var isOpen = content.style.display === 'block';
+content.style.display = isOpen ? 'none' : 'block';
+label.innerText = isOpen ? 'WÖRTERBUCH ANZEIGEN' : 'WÖRTERBUCH VERBERGEN';
+if (!isOpen) { renderList(); }
 }
 
 function renderList() {
 var list = document.getElementById('dictionaryList');
-if (daten.length === 0) { list.innerHTML = "Leer" return; }
-var html = ""
-daten.sort((a,b) => (a.cat||"").localeCompare(b.cat||"") || a.hr.localeCompare(b.hr)).forEach((item, i) => {
-html += `<div class="entry"><span onclick="speakHr('${item.hr}')"><b>${item.hr}</b> - ${item.de} 🔊</span><span class="del-btn" onclick="deleteEntry(${i})">❌</span></div>`;
+if (daten.length === 0) {
+list.innerHTML = "<p style='text-align:center; color:#999;'>Leer</p>"
+return;
+}
+var sortierte = daten.slice().sort(function(a, b) {
+var ca = a.cat || "Allgemein"
+var cb = b.cat || "Allgemein"
+if (ca < cb) { return -1; }
+if (ca > cb) { return 1; }
+return a.hr.localeCompare(b.hr, 'hr');
 });
+var html = ""
+var lastCat = ""
+for (var i = 0; i < sortierte.length; i++) {
+var item = sortierte[i];
+if (item.cat !== lastCat) {
+html += '<div class="cat-head">' + (item.cat || "Allgemein").toUpperCase() + '</div>';
+lastCat = item.cat;
+}
+var idx = -1;
+for (var j = 0; j < daten.length; j++) {
+if (daten[j].hr === item.hr && daten[j].de === item.de) { idx = j; break; }
+}
+// Kroatisches Wort als anklickbares Element für Sprache
+html += '<div class="entry">'
++ '<span><span class="speak-item" data-text="' + item.hr + '"><b>' + item.hr + '</b></span> - ' + item.de + ' 🔊</span>'
++ '<span class="del-btn" data-idx="' + idx + '">❌</span></div>';
+}
 list.innerHTML = html;
+
+// Listeners für Löschen
+var delBtns = list.getElementsByClassName('del-btn');
+for (var k = 0; k < delBtns.length; k++) {
+delBtns[k].addEventListener('click', function(e) {
+e.stopPropagation();
+deleteEntry(parseInt(this.getAttribute('data-idx'), 10));
+});
+}
+// Listeners für Aussprache im Wörterbuch
+var speakItems = list.getElementsByClassName('speak-item');
+for (var s = 0; s < speakItems.length; s++) {
+speakItems[s].addEventListener('click', function() {
+speakHr(this.getAttribute('data-text'));
+});
+}
 }
 
-function deleteEntry(i) { if (confirm("Löschen?")) { daten.splice(i, 1); localStorage.setItem(STORAGE_KEY, JSON.stringify(daten)); renderList(); } }
+function emergencyImport() {
+var keys = ['masterDict_final', 'kroatisch_master_final_v1', 'masterDict_v4'];
+var found = false;
+for (var i = 0; i < keys.length; i++) {
+var old = JSON.parse(localStorage.getItem(keys[i]));
+if (old && Array.isArray(old)) {
+for (var j = 0; j < old.length; j++) {
+var o = old[j];
+var exists = false;
+for (var k = 0; k < daten.length; k++) {
+if (daten[k].hr === o.hr) { exists = true; break; }
+}
+if (!exists) {
+daten.push({hr: o.hr, de: o.de, cat: o.cat || "Allgemein"});
+found = true;
+}
+}
+}
+}
+if (found) {
+localStorage.setItem(STORAGE_KEY, JSON.stringify(daten));
+location.reload();
+} else {
+alert("Keine alten Daten gefunden.");
+}
+}
+
+function deleteEntry(i) {
+if (confirm("Löschen?")) {
+daten.splice(i, 1);
+localStorage.setItem(STORAGE_KEY, JSON.stringify(daten));
+renderList();
+checkVisibility();
+}
+}
 
 function saveWort() {
-var h = document.getElementById('hrIn').value.trim(), d = document.getElementById('deIn').value.trim(), c = document.getElementById('catIn').value;
-if (!h || !d) return;
+var h = document.getElementById('hrIn').value.trim();
+var d = document.getElementById('deIn').value.trim();
+var c = document.getElementById('catIn').value;
+if (!h || !d) { return; }
 daten.push({hr: h, de: d, cat: c});
 localStorage.setItem(STORAGE_KEY, JSON.stringify(daten));
 location.reload();
 }
 
 function nextQuestion() {
-if (daten.length === 0) return;
+if (daten.length === 0) { return; }
 isLocked = false;
+document.getElementById('answer').disabled = false;
 document.getElementById('solutionDisplay').style.display = 'none';
+document.getElementById('feedback').innerText = ""
 currentItem = daten[Math.floor(Math.random() * daten.length)];
 currentQuestionMode = Math.random() > 0.5 ? "hr" : "de"
 document.getElementById('question').innerText = currentQuestionMode === "hr" ? currentItem.de : currentItem.hr;
 document.getElementById('answer').value = ""
-document.getElementById('answer').disabled = false;
 document.getElementById('answer').focus();
 }
 
 function handleWrong() {
 isLocked = true;
-var sol = currentQuestionMode === "hr" ? currentItem.hr : currentItem.de;
-document.getElementById('solutionDisplay').innerHTML = "Lösung: " + sol;
-document.getElementById('solutionDisplay').style.display = 'block';
-if (currentQuestionMode === "hr") speakHr(currentItem.hr);
-setTimeout(() => { isLocked = false; document.getElementById('answer').disabled = false; document.getElementById('answer').focus(); }, 2000);
+var solDiv = document.getElementById('solutionDisplay');
+var correctText = currentQuestionMode === "hr" ? currentItem.hr : currentItem.de;
+solDiv.innerHTML = 'Lösung:<br><span style="font-size:1.4rem;">' + correctText + '</span>';
+solDiv.style.display = 'block';
+document.getElementById('answer').disabled = true;
+if (currentQuestionMode === "hr") { speakHr(currentItem.hr); }
+setTimeout(function() {
+solDiv.style.display = 'none';
+document.getElementById('answer').disabled = false;
+document.getElementById('answer').focus();
+document.getElementById('feedback').style.color = "blue"
+document.getElementById('feedback').innerText = "Jetzt eintippen!"
+isLocked = false;
+}, 3000);
 }
 
 function checkInput() {
-if (isLocked) return;
+if (isLocked) { return; }
 var input = document.getElementById('answer').value.trim().toLowerCase();
 var correct = (currentQuestionMode === "hr" ? currentItem.hr : currentItem.de).toLowerCase();
 if (input === correct) {
-if (currentQuestionMode === "hr") speakHr(currentItem.hr);
-document.getElementById('feedback').innerText = "✓"
-setTimeout(nextQuestion, 800);
-} else { handleWrong(); }
+document.getElementById('feedback').style.color = "green"
+document.getElementById('feedback').innerText = "✓ Richtig!"
+if (currentQuestionMode === "hr") { speakHr(currentItem.hr); }
+setTimeout(nextQuestion, 1000);
+} else {
+handleWrong();
+}
 }
 
-document.getElementById('btnSave').onclick = saveWort;
-document.getElementById('btnCheck').onclick = onlineCheck;
-document.getElementById('tBtnLabel').onclick = () => {
-var d = document.getElementById('dictContent');
-d.style.display = d.style.display === 'block' ? 'none' : 'block';
-renderList();
-};
-document.getElementById('hintBtn').onclick = handleWrong;
-document.getElementById('answer').onkeypress = (e) => { if(e.key === 'Enter') checkInput(); };
-document.getElementById('sBtn').onclick = () => {
+function startFlash() {
+if (daten.length === 0) { return; }
 document.getElementById('sBtn').style.display = 'none';
 document.getElementById('stopBtn').style.display = 'block';
-flashInterval = setInterval(() => {
+document.getElementById('fBox').classList.add('flash-active');
+flashInterval = setInterval(function() {
 var r = daten[Math.floor(Math.random() * daten.length)];
 document.getElementById('fHr').innerText = r.hr;
 document.getElementById('fDe').innerText = r.de;
-}, 80);
-};
-document.getElementById('stopBtn').onclick = () => { clearInterval(flashInterval); document.getElementById('sBtn').style.display='block'; document.getElementById('stopBtn').style.display='none'; };
+}, 60);
+}
 
-// Sprach-Lader
-if (window.speechSynthesis.onvoiceschanged !== undefined) {
-window.speechSynthesis.onvoiceschanged = initVoices;
+function stopFlash() {
+clearInterval(flashInterval);
+document.getElementById('sBtn').style.display = 'block';
+document.getElementById('stopBtn').style.display = 'none';
+document.getElementById('fBox').classList.remove('flash-active');
+}
+
+// Event Listener
+document.getElementById('btnSave').addEventListener('click', function() { saveWort(); });
+document.getElementById('tBtnLabel').addEventListener('click', function() { toggleDict(); });
+document.getElementById('btnRescue').addEventListener('click', function() { emergencyImport(); });
+document.getElementById('hintBtn').addEventListener('click', function() { handleWrong(); });
+document.getElementById('sBtn').addEventListener('click', function() { startFlash(); });
+document.getElementById('stopBtn').addEventListener('click', function() { stopFlash(); });
+document.getElementById('answer').addEventListener('keypress', function(e) {
+if (e.key === 'Enter') { checkInput(); }
+});
+
+// Init
+if (window.speechSynthesis && window.speechSynthesis.onvoiceschanged !== undefined) {
+window.speechSynthesis.onvoiceschanged = function() { initVoices(); };
 }
 initVoices();
-
-if (daten.length > 0) { document.getElementById('trainArea').style.display = 'block'; nextQuestion(); }
+checkVisibility();
 </script>
+
 </body>
 </html>
