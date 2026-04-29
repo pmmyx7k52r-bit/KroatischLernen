@@ -3,187 +3,260 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Kroatisch Master v1.9.2</title>
+<title>Kroatisch Master v3.0.0</title>
 <style>
-:root { --hr-blue: #002395; --bg: #f0f2f5; --red: #ff4444; --green: #28a745; --gold: #f39c12; }
-body { font-family: sans-serif; background: var(--bg); display: flex; flex-direction: column; align-items: center; padding: 10px; margin: 0; }
-.card { max-width: 500px; width: 100%; background: white; padding: 15px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 10px; box-sizing: border-box; }
-h2 { color: var(--hr-blue); font-size: 0.9rem; margin: 0 0 10px 0; text-transform: uppercase; border-bottom: 1px solid #eee; }
-input, select { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; margin-bottom: 8px; box-sizing: border-box; font-size: 1rem; }
-.btn-group { display: flex; gap: 5px; margin-bottom: 8px; }
-.btn { padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; color: white; font-size: 1rem; }
+:root { --hr-blue: #002395; --bg: #f4f7f6; --red: #ff4444; --green: #28a745; --gold: #f39c12; }
+body { font-family: -apple-system, sans-serif; background: var(--bg); display: flex; flex-direction: column; align-items: center; padding: 10px; margin: 0; }
+.card { max-width: 500px; width: 100%; background: white; padding: 20px; border-radius: 18px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); margin-bottom: 12px; box-sizing: border-box; }
+h2 { color: var(--hr-blue); font-size: 0.85rem; margin: 0 0 12px 0; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+input, select { width: 100%; padding: 14px; border: 2px solid #edf2f7; border-radius: 10px; margin-bottom: 10px; box-sizing: border-box; font-size: 1rem; outline: none; transition: border 0.2s; }
+input:focus { border-color: var(--hr-blue); }
+.btn-group { display: flex; gap: 8px; margin-bottom: 10px; }
+.btn { padding: 14px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; color: white; font-size: 1rem; flex: 1; transition: opacity 0.2s; }
+.btn:active { opacity: 0.7; }
 .btn-add { background: var(--hr-blue); flex: 2; }
-.btn-check { background: var(--gold); flex: 1; font-size: 0.8rem; }
-.btn-flash { background: #000; width: 100%; }
-.btn-hint { background: #666; width: 100%; }
+.btn-check { background: var(--gold); }
+.btn-flash { background: #1a202c; width: 100%; }
 .btn-stop { background: var(--red); display: none; width: 100%; }
-.dict-toggle-btn { background: #eee; color: #333; padding: 12px; border-radius: 8px; text-align: center; cursor: pointer; font-weight: bold; width: 100%; border: 1px solid #ccc; box-sizing: border-box; }
-#dictContent { display: none; margin-top: 10px; width: 100%; }
-.dict-list { max-height: 350px; overflow-y: auto; }
-.cat-head { background: #e8e8e8; padding: 6px; font-weight: bold; font-size: 0.7rem; margin-top: 10px; border-radius: 4px; color: #444; border-left: 4px solid var(--hr-blue); }
-.entry { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #eee; font-size: 0.9rem; }
-.del-btn { color: var(--red); font-size: 0.7rem; cursor: pointer; padding: 4px 8px; }
-.flash-box { height: 150px; display: flex; flex-direction: column; justify-content: center; align-items: center; background: #fff; border: 4px solid #eee; border-radius: 12px; text-align: center; }
-.flash-active { background: #000 !important; color: #fff !important; }
-.flash-hr { font-size: 2.2rem; font-weight: 900; color: var(--hr-blue); }
-#solutionDisplay { display: none; color: var(--red); text-align: center; font-weight: bold; margin: 10px 0; background: #fff0f0; padding: 15px; border-radius: 8px; border: 1px solid var(--red); font-size: 1.1rem; }
+.dict-toggle-btn { background: #edf2f7; color: #4a5568; padding: 12px; border-radius: 10px; text-align: center; cursor: pointer; font-weight: bold; width: 100%; border: 1px solid #e2e8f0; }
+#dictContent { display: none; margin-top: 12px; width: 100%; }
+.cat-head { background: #f7fafc; padding: 8px; font-weight: bold; font-size: 0.75rem; margin-top: 15px; border-radius: 6px; color: #718096; border-left: 4px solid var(--hr-blue); }
+.entry { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #edf2f7; font-size: 0.95rem; }
+.lvl-tag { font-size: 0.65rem; padding: 3px 7px; border-radius: 12px; background: #ebf8ff; color: #3182ce; font-weight: bold; margin-left: 8px; }
+.del-btn { color: #a0aec0; cursor: pointer; padding: 8px; font-size: 1rem; }
+.flash-box { height: 160px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+.flash-hr { font-size: 2.4rem; font-weight: 800; color: var(--hr-blue); margin-bottom: 4px; }
+#solutionDisplay { display: none; color: var(--red); text-align: center; font-weight: bold; margin: 12px 0; background: #fff5f5; padding: 18px; border-radius: 12px; border: 1px solid #feb2b2; }
+.stats-row { display: flex; justify-content: space-between; font-size: 0.75rem; color: #718096; margin-bottom: 10px; }
 </style>
 </head>
 <body>
 
 <div class="card">
-<h2>1. Eingabe &amp; Check</h2>
-<input type="text" id="hrIn" placeholder="Kroatisch">
-<input type="text" id="deIn" placeholder="Deutsch">
+<h2>1. Neuer Eintrag</h2>
+<input type="text" id="hrIn" placeholder="Kroatisch (z.B. Sladoled)">
+<input type="text" id="deIn" placeholder="Deutsch (z.B. Eis)">
 <select id="catIn">
 <option value="Allgemein">Allgemein</option>
-<option value="Phrasen">Phrasen / Sätze</option>
-<option value="Zahlen/Tage">Zahlen &amp; Tage</option>
+<option value="Phrasen">Phrasen</option>
+<option value="Urlaub">Urlaub</option>
 </select>
 <div class="btn-group">
 <button type="button" id="btnCheck" class="btn btn-check">🔍 CHECK</button>
 <button type="button" id="btnSave" class="btn btn-add">SPEICHERN</button>
 </div>
-<div id="voice-status" style="font-size:0.7rem; margin-bottom:8px; color: #888;">Stimme wird gesucht...</div>
-<div class="dict-toggle-btn" id="tBtnLabel">WÖRTERBUCH ANZEIGEN</div>
-<div id="dictContent"><div id="dictionaryList" class="dict-list"></div></div>
+<div id="voice-status" style="font-size:0.7rem; color: #a0aec0;">Initialisiere Audio...</div>
 </div>
 
 <div class="card" id="trainArea" style="display:none;">
-<h2>2. Training</h2>
-<div id="question" style="font-size:1.5rem; text-align:center; font-weight:bold; margin:10px;"></div>
+<div class="stats-row">
+<span>TRAINING</span>
+<span id="trainStats">Lvl 0</span>
+</div>
+<div id="question" style="font-size:1.6rem; text-align:center; font-weight:800; margin:15px 0;"></div>
 <div id="solutionDisplay"></div>
-<input type="text" id="answer" placeholder="Antwort...">
-<button type="button" id="hintBtn" class="btn btn-hint">WEISS ICH NICHT</button>
-<div id="feedback" style="text-align:center; height:20px; font-weight:bold; margin-top:5px;"></div>
+<input type="text" id="answer" placeholder="Antwort eingeben..." autocomplete="off">
+<div id="feedback" style="text-align:center; height:24px; font-weight:bold; color: var(--green);"></div>
+<button type="button" class="btn" style="background:#718096; margin-top:10px;" id="btnHint">WEISS ICH NICHT</button>
 </div>
 
 <div class="card">
-<h2>3. Flash</h2>
-<div id="fBox" class="flash-box">
-<div id="fHr" class="flash-hr">START</div>
-<div id="fDe" style="color:#888;">bereit</div>
+<div class="dict-toggle-btn" id="tBtnLabel">WÖRTERBUCH ANZEIGEN</div>
+<div id="dictContent"><div id="dictionaryList"></div></div>
 </div>
-<button type="button" id="sBtn" class="btn btn-flash">START</button>
+
+<div class="card">
+<h2>3. Flash-Modus</h2>
+<div class="flash-box">
+<div id="fHr" class="flash-hr">START</div>
+<div id="fDe" style="color:#718096; font-size: 1.1rem;">bereit</div>
+</div>
+<button type="button" id="sBtn" class="btn btn-flash">START (AUDIO)</button>
 <button type="button" id="stopBtn" class="btn btn-stop">STOPP</button>
 </div>
 
 <script>
-var STORAGE_KEY = 'kroatisch_master_final_v1';
-var daten = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-var currentItem = null, currentQuestionMode = "", isLocked = false, flashInterval = null, hrVoice = null;
+const STORAGE_KEY = 'kroatisch_master_v3_0';
+let daten = (JSON.parse(localStorage.getItem(STORAGE_KEY)) || []).map(x => ({
+hr: x.hr, de: x.de, cat: x.cat || "Allgemein", lvl: x.lvl || 0
+}));
 
+let currentItem = null, currentMode = "", isLocked = false, flashInterval = null, hrVoice = null;
+
+// --- AUDIO SYSTEM (Fix 3: Anti-Spam & Init) ---
 function initVoices() {
-if (!window.speechSynthesis) return;
-var v = window.speechSynthesis.getVoices();
-hrVoice = v.find(x => x.lang.includes('hr'));
-var el = document.getElementById('voice-status');
-if(hrVoice) { el.innerText = "✓ Stimme aktiv" el.style.color="green" }
-else { el.innerText = "⚠ Suche läuft/Standard..." }
+const loadVoices = () => {
+hrVoice = speechSynthesis.getVoices().find(v => v.lang.toLowerCase().includes('hr'));
+const el = document.getElementById('voice-status');
+if (hrVoice) { el.innerText = "✓ Kroatisch (HD) aktiv" el.style.color = "var(--green)" }
+};
+loadVoices();
+speechSynthesis.onvoiceschanged = loadVoices;
 }
 
 function speakHr(text) {
-if (!window.speechSynthesis) return;
-window.speechSynthesis.cancel();
-var msg = new SpeechSynthesisUtterance(text);
+if (!window.speechSynthesis || speechSynthesis.speaking) return;
+const msg = new SpeechSynthesisUtterance(text);
 if (hrVoice) msg.voice = hrVoice;
 msg.lang = 'hr-HR';
 msg.rate = 0.85;
-window.speechSynthesis.speak(msg);
+speechSynthesis.speak(msg);
 }
 
-// Verbesserte Check-Funktion
-function onlineCheck() {
-var word = document.getElementById('hrIn').value.trim();
-if (!word) { alert("Bitte kroatisches Wort eingeben"); return; }
-var url = "https://glosbe.com/hr/de/" + encodeURIComponent(word);
-// Versuch 1: Direktes Öffnen
-var win = window.open(url, '_blank');
-// Falls Browser blockiert:
-if(!win || win.closed || typeof win.closed=='undefined') {
-alert("Pop-up blockiert! Bitte erlaube Pop-ups für diese Seite oder klicke den Link manuell.");
-}
+// --- LOGIK & SICHERHEIT (Fix 5 & 6) ---
+function normalize(str) {
+return str.toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d");
 }
 
+function saveWort() {
+const h = document.getElementById('hrIn').value.trim();
+const d = document.getElementById('deIn').value.trim();
+if (!h || !d) return;
+
+if (daten.some(x => normalize(x.hr) === normalize(h))) {
+alert("Dieses Wort existiert bereits!");
+return;
+}
+
+daten.push({ hr: h, de: d, cat: document.getElementById('catIn').value, lvl: 0 });
+save();
+document.getElementById('hrIn').value = ""
+document.getElementById('deIn').value = ""
+renderList();
+checkUI();
+}
+
+function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(daten)); }
+
+// --- RENDERER (Fix 2: XSS Schutz via Event Delegation) ---
 function renderList() {
-var list = document.getElementById('dictionaryList');
-if (daten.length === 0) { list.innerHTML = "Leer" return; }
-var html = ""
-daten.sort((a,b) => (a.cat||"").localeCompare(b.cat||"") || a.hr.localeCompare(b.hr)).forEach((item, i) => {
-html += `<div class="entry"><span onclick="speakHr('${item.hr}')"><b>${item.hr}</b> - ${item.de} 🔊</span><span class="del-btn" onclick="deleteEntry(${i})">❌</span></div>`;
+const list = document.getElementById('dictionaryList');
+if (!daten.length) { list.innerHTML = "Leer" return; }
+const grouped = daten.reduce((acc, item) => {
+(acc[item.cat] = acc[item.cat] || []).push(item);
+return acc;
+}, {});
+
+let html = ""
+for (let cat in grouped) {
+html += `<div class="cat-head">${cat.toUpperCase()}</div>`;
+grouped[cat].forEach(item => {
+html += `<div class="entry">
+<span class="clickable-hr" data-hr="${encodeURIComponent(item.hr)}">
+<b>${item.hr}</b> - ${item.de} <span class="lvl-tag">Lvl ${item.lvl}</span> 🔊
+</span>
+<span class="del-btn" data-idx="${daten.indexOf(item)}">❌</span>
+</div>`;
 });
+}
 list.innerHTML = html;
 }
 
-function deleteEntry(i) { if (confirm("Löschen?")) { daten.splice(i, 1); localStorage.setItem(STORAGE_KEY, JSON.stringify(daten)); renderList(); } }
-
-function saveWort() {
-var h = document.getElementById('hrIn').value.trim(), d = document.getElementById('deIn').value.trim(), c = document.getElementById('catIn').value;
-if (!h || !d) return;
-daten.push({hr: h, de: d, cat: c});
-localStorage.setItem(STORAGE_KEY, JSON.stringify(daten));
-location.reload();
-}
-
+// --- TRAINING (Fix 4 & 5: Leitner-Light) ---
 function nextQuestion() {
-if (daten.length === 0) return;
+if (!daten.length) return;
 isLocked = false;
 document.getElementById('solutionDisplay').style.display = 'none';
-currentItem = daten[Math.floor(Math.random() * daten.length)];
-currentQuestionMode = Math.random() > 0.5 ? "hr" : "de"
-document.getElementById('question').innerText = currentQuestionMode === "hr" ? currentItem.de : currentItem.hr;
+document.getElementById('feedback').innerText = ""
+// Gewichtung: Level 5 erscheint fast nie, Level 0 massiv oft
+const pool = [];
+daten.forEach(item => {
+if (item.lvl >= 5 && Math.random() > 0.1) return; // 90% Chance, dass Lvl 5 ignoriert wird
+const weight = Math.pow(2, 5 - item.lvl);
+for(let i=0; i<weight; i++) pool.push(item);
+});
+
+currentItem = pool.length ? pool[Math.floor(Math.random() * pool.length)] : daten[0];
+currentMode = Math.random() > 0.5 ? "hr" : "de"
+document.getElementById('question').innerText = currentMode === "hr" ? currentItem.de : currentItem.hr;
+document.getElementById('trainStats').innerText = `Level ${currentItem.lvl}`;
 document.getElementById('answer').value = ""
-document.getElementById('answer').disabled = false;
 document.getElementById('answer').focus();
+}
+
+function updateLvl(success) {
+if (success) {
+if (currentItem.lvl < 5) currentItem.lvl++;
+} else {
+currentItem.lvl = Math.max(0, currentItem.lvl - 2); // Moderaterer Rückfall
+}
+save();
 }
 
 function handleWrong() {
 isLocked = true;
-var sol = currentQuestionMode === "hr" ? currentItem.hr : currentItem.de;
-document.getElementById('solutionDisplay').innerHTML = "Lösung: " + sol;
-document.getElementById('solutionDisplay').style.display = 'block';
-if (currentQuestionMode === "hr") speakHr(currentItem.hr);
-setTimeout(() => { isLocked = false; document.getElementById('answer').disabled = false; document.getElementById('answer').focus(); }, 2000);
+updateLvl(false);
+const sol = currentMode === "hr" ? currentItem.hr : currentItem.de;
+const sd = document.getElementById('solutionDisplay');
+sd.innerHTML = `Lösung:<br><span style="font-size:1.4rem">${sol}</span>`;
+sd.style.display = 'block';
+if (currentMode === "hr") speakHr(currentItem.hr);
+setTimeout(nextQuestion, 2800);
 }
 
-function checkInput() {
-if (isLocked) return;
-var input = document.getElementById('answer').value.trim().toLowerCase();
-var correct = (currentQuestionMode === "hr" ? currentItem.hr : currentItem.de).toLowerCase();
-if (input === correct) {
-if (currentQuestionMode === "hr") speakHr(currentItem.hr);
-document.getElementById('feedback').innerText = "✓"
-setTimeout(nextQuestion, 800);
-} else { handleWrong(); }
+// --- EVENTS ---
+document.addEventListener("click", e => {
+const speakEl = e.target.closest(".clickable-hr");
+if (speakEl) speakHr(decodeURIComponent(speakEl.dataset.hr));
+
+const delEl = e.target.closest(".del-btn");
+if (delEl && confirm("Löschen?")) {
+daten.splice(parseInt(delEl.dataset.idx), 1);
+save(); renderList(); checkUI();
 }
+});
 
 document.getElementById('btnSave').onclick = saveWort;
-document.getElementById('btnCheck').onclick = onlineCheck;
-document.getElementById('tBtnLabel').onclick = () => {
-var d = document.getElementById('dictContent');
-d.style.display = d.style.display === 'block' ? 'none' : 'block';
-renderList();
+document.getElementById('btnCheck').onclick = () => {
+const w = document.getElementById('hrIn').value.trim();
+if (w) window.location.href = `https://glosbe.com/hr/de/${encodeURIComponent(w)}`;
 };
-document.getElementById('hintBtn').onclick = handleWrong;
-document.getElementById('answer').onkeypress = (e) => { if(e.key === 'Enter') checkInput(); };
+document.getElementById('tBtnLabel').onclick = () => {
+const c = document.getElementById('dictContent');
+c.style.display = c.style.display === 'block' ? 'none' : 'block';
+if(c.style.display === 'block') renderList();
+};
+document.getElementById('btnHint').onclick = handleWrong;
+
+document.getElementById('answer').onkeypress = e => {
+if (e.key === 'Enter' && !isLocked) {
+const cor = currentMode === "hr" ? currentItem.hr : currentItem.de;
+if (normalize(document.getElementById('answer').value) === normalize(cor)) {
+updateLvl(true);
+if (currentMode === "hr") speakHr(currentItem.hr);
+document.getElementById('feedback').innerText = "✓ Gut gemacht!"
+setTimeout(nextQuestion, 900);
+} else { handleWrong(); }
+}
+};
+
+// --- FLASH (Fix 8) ---
 document.getElementById('sBtn').onclick = () => {
+if (!daten.length) return;
 document.getElementById('sBtn').style.display = 'none';
 document.getElementById('stopBtn').style.display = 'block';
 flashInterval = setInterval(() => {
-var r = daten[Math.floor(Math.random() * daten.length)];
-document.getElementById('fHr').innerText = r.hr;
-document.getElementById('fDe').innerText = r.de;
-}, 80);
+const r = daten[Math.floor(Math.random() * daten.length)];
+const m = Math.random() > 0.5 ? "hr" : "de"
+document.getElementById('fHr').innerText = m === "hr" ? r.hr : r.de;
+document.getElementById('fDe').innerText = m === "hr" ? r.de : r.hr;
+speakHr(r.hr);
+}, 2200);
 };
-document.getElementById('stopBtn').onclick = () => { clearInterval(flashInterval); document.getElementById('sBtn').style.display='block'; document.getElementById('stopBtn').style.display='none'; };
 
-// Sprach-Lader
-if (window.speechSynthesis.onvoiceschanged !== undefined) {
-window.speechSynthesis.onvoiceschanged = initVoices;
+document.getElementById('stopBtn').onclick = () => {
+clearInterval(flashInterval);
+document.getElementById('sBtn').style.display = 'block';
+document.getElementById('stopBtn').style.display = 'none';
+};
+
+function checkUI() {
+document.getElementById('trainArea').style.display = daten.length ? 'block' : 'none';
+if (daten.length && !currentItem) nextQuestion();
 }
-initVoices();
 
-if (daten.length > 0) { document.getElementById('trainArea').style.display = 'block'; nextQuestion(); }
+initVoices();
+checkUI();
 </script>
 </body>
 </html>
