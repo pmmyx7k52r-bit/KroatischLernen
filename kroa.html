@@ -3,167 +3,50 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Kroatisch Master v3.5.4</title>
+<title>Kroatisch Master v3.5.5</title>
 <style>
-:root { --hr-blue: #002395; --bg: #f4f7f6; --red: #ff4444; --green: #28a745; --gold: #f39c12; }
-body { font-family: -apple-system, sans-serif; background: var(--bg); display: flex; flex-direction: column; align-items: center; padding: 10px; margin: 0; cursor: pointer; }
+:root { --hr-blue: #002395; --bg: #f4f7f6; --red: #ff4444; }
+body { font-family: -apple-system, sans-serif; background: var(--bg); display: flex; flex-direction: column; align-items: center; padding: 10px; margin: 0; }
 .card { max-width: 500px; width: 100%; background: white; padding: 20px; border-radius: 18px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); margin-bottom: 12px; box-sizing: border-box; }
-h2 { color: var(--hr-blue); font-size: 0.85rem; margin: 0 0 12px 0; text-transform: uppercase; border-bottom: 1px solid #eee; padding-bottom: 5px; }
-input, select { width: 100%; padding: 14px; border: 2px solid #edf2f7; border-radius: 10px; margin-bottom: 10px; box-sizing: border-box; font-size: 1rem; outline: none; -webkit-appearance: none; }
-.btn-group { display: flex; gap: 8px; margin-bottom: 10px; }
-.btn { padding: 16px; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; color: white; font-size: 1rem; flex: 1; -webkit-tap-highlight-color: rgba(0,0,0,0); }
-.btn-add { background: var(--hr-blue); flex: 2; }
-.btn-check { background: var(--gold); }
-.btn-flash { background: #1a202c; width: 100%; }
-.btn-stop { background: var(--red); display: none; width: 100%; }
-.dict-toggle-btn { background: #edf2f7; color: #4a5568; padding: 12px; border-radius: 10px; text-align: center; cursor: pointer; font-weight: bold; width: 100%; border: 1px solid #e2e8f0; }
-#dictContent { display: none; margin-top: 12px; width: 100%; }
-.entry { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #edf2f7; }
-#solutionDisplay { display: none; color: var(--red); text-align: center; font-weight: bold; margin: 12px 0; background: #fff5f5; padding: 15px; border-radius: 12px; border: 1px solid #feb2b2; }
+input { width: 100%; padding: 14px; border: 2px solid #edf2f7; border-radius: 10px; margin-bottom: 10px; box-sizing: border-box; font-size: 1rem; -webkit-appearance: none; }
+.btn { padding: 16px; border: none; border-radius: 12px; font-weight: bold; color: white; font-size: 1rem; width: 100%; display: block; background: var(--hr-blue); margin-top: 5px; -webkit-tap-highlight-color: transparent; }
+#dictionaryList { margin-top: 10px; font-size: 0.9rem; }
 </style>
 </head>
-<body ontouchstart="">
+<body>
 
 <div class="card">
-<h2>1. Neuer Eintrag</h2>
-<input type="text" id="hrIn" placeholder="Kroatisch (z.B. Sladoled)">
-<input type="text" id="deIn" placeholder="Deutsch (z.B. Eis)">
-<select id="catIn">
-<option value="Allgemein">Allgemein</option>
-<option value="Phrasen">Phrasen</option>
-<option value="Essen">Essen & Trinken</option>
-<option value="Zahlen">Zahlen</option>
-<option value="Tage">Tage & Zeit</option>
-</select>
-<div class="btn-group">
-<button type="button" id="btnCheck" class="btn btn-check" onclick="window.location.href='https://glosbe.com/hr/de/'+encodeURIComponent(document.getElementById('hrIn').value)">CHECK</button>
-<button type="button" id="btnSave" class="btn btn-add" onclick="saveWort()">SPEICHERN</button>
-</div>
-</div>
-
-<div class="card" id="trainArea" style="display:none;">
-<h2>2. Training</h2>
-<div id="question" style="font-size:1.6rem; text-align:center; font-weight:800; margin:15px 0;"></div>
-<div id="solutionDisplay"></div>
-<input type="text" id="answer" placeholder="Antwort..." autocomplete="off">
-<div id="feedback" style="text-align:center; height:24px; font-weight:bold; color: var(--green);"></div>
-<button type="button" class="btn" style="background:#718096; margin-top:10px; width:100%;" onclick="handleWrong()">WEISS ICH NICHT</button>
-</div>
-
-<div class="card">
-<div class="dict-toggle-btn" onclick="toggleDict()">WÖRTERBUCH ANZEIGEN</div>
-<div id="dictContent"><div id="dictionaryList"></div></div>
-</div>
-
-<div class="card">
-<h2>3. Flash-Modus</h2>
-<div id="fHr" style="font-size:2rem; font-weight:800; color:var(--hr-blue); text-align:center;">START</div>
-<div id="fDe" style="color:#718096; text-align:center; margin-bottom:15px;">bereit</div>
-<button type="button" id="sBtn" class="btn btn-flash" onclick="startFlash()">START</button>
-<button type="button" id="stopBtn" class="btn btn-stop" onclick="stopFlash()">STOPP</button>
-</div>
-
-<script>
-var daten = [];
-var currentItem = null;
-var currentMode = ""
-var flashInterval = null;
-
-// --- FEHLERSICHERER SPEICHER ---
-try {
-var stored = localStorage.getItem('kroat_master_v4');
-if (stored) daten = JSON.parse(stored);
-} catch (e) {
-console.log("Speicher blockiert, nutze Arbeitsspeicher");
-}
-
-function saveToDisk() {
-try {
-localStorage.setItem('kroat_master_v4', JSON.stringify(daten));
-} catch (e) {}
-}
-
-// --- FUNKTIONEN ---
-function saveWort() {
-var h = document.getElementById('hrIn').value.trim();
-var d = document.getElementById('deIn').value.trim();
-if (!h || !d) return;
-daten.push({ hr: h, de: d, cat: document.getElementById('catIn').value, lvl: 0 });
-saveToDisk();
-document.getElementById('hrIn').value = ""
-document.getElementById('deIn').value = ""
-renderList();
-checkUI();
-}
-
-function renderList() {
-var list = document.getElementById('dictionaryList');
-var html = ""
-for (var i = 0; i < daten.length; i++) {
-html += '<div class="entry"><span><b>' + daten[i].hr + '</b> - ' + daten[i].de + '</span></div>';
-}
-list.innerHTML = html || "Leer"
-}
-
-function toggleDict() {
-var c = document.getElementById('dictContent');
-c.style.display = (c.style.display === 'block') ? 'none' : 'block';
-if(c.style.display === 'block') renderList();
-}
-
-function nextQuestion() {
-if (!daten.length) return;
-document.getElementById('solutionDisplay').style.display = 'none';
-document.getElementById('feedback').innerText = ""
-currentItem = daten[Math.floor(Math.random() * daten.length)];
-currentMode = Math.random() > 0.5 ? "hr" : "de"
-document.getElementById('question').innerText = currentMode === "hr" ? currentItem.de : currentItem.hr;
-document.getElementById('answer').value = ""
-}
-
-document.getElementById('answer').onkeypress = function(e) {
-if (e.key === 'Enter') {
-var val = document.getElementById('answer').value.toLowerCase().trim();
-var cor = (currentMode === "hr" ? currentItem.hr : currentItem.de).toLowerCase().trim();
-if (val === cor) {
-document.getElementById('feedback').innerText = "✓ Richtig!"
-setTimeout(nextQuestion, 800);
+<h2>Test: Wort Hinzufügen</h2>
+<input type="text" id="hrIn" placeholder="Kroatisch">
+<input type="text" id="deIn" placeholder="Deutsch">
+<button type="button" class="btn" onclick="
+var h = document.getElementById('hrIn').value;
+var d = document.getElementById('deIn').value;
+if(h && d) {
+var el = document.createElement('div');
+el.innerText = h + ' = ' + d;
+document.getElementById('dictionaryList').appendChild(el);
+document.getElementById('hrIn').value = '';
+document.getElementById('deIn').value = '';
+alert('Wort hinzugefügt!');
 } else {
-handleWrong();
+alert('Bitte beide Felder füllen');
 }
-}
-};
+">SPEICHERN TESTEN</button>
+</div>
 
-function handleWrong() {
-document.getElementById('solutionDisplay').innerText = "Lösung: " + (currentMode === "hr" ? currentItem.hr : currentItem.de);
-document.getElementById('solutionDisplay').style.display = 'block';
-setTimeout(nextQuestion, 2000);
-}
+<div class="card">
+<h2>Wörterbuch (Temporär)</h2>
+<div id="dictionaryList">Noch keine Wörter.</div>
+</div>
 
-function startFlash() {
-if (!daten.length) return;
-document.getElementById('sBtn').style.display = 'none';
-document.getElementById('stopBtn').style.display = 'block';
-flashInterval = setInterval(function() {
-var r = daten[Math.floor(Math.random() * daten.length)];
-document.getElementById('fHr').innerText = r.hr;
-document.getElementById('fDe').innerText = r.de;
-}, 2000);
-}
+<div class="card">
+<h2>Info</h2>
+<p style="font-size: 0.8rem; color: #666;">
+Diese Version speichert <b>nichts</b> dauerhaft.
+Wenn der Button "Wort hinzugefügt" anzeigt, liegt das Problem am iOS-Sicherheitssystem für lokalen Speicher.
+</p>
+</div>
 
-function stopFlash() {
-clearInterval(flashInterval);
-document.getElementById('sBtn').style.display = 'block';
-document.getElementById('stopBtn').style.display = 'none';
-}
-
-function checkUI() {
-document.getElementById('trainArea').style.display = daten.length ? 'block' : 'none';
-if (daten.length && !currentItem) nextQuestion();
-}
-
-// Sofort-Check beim Laden
-window.onload = checkUI;
-</script>
 </body>
 </html>
