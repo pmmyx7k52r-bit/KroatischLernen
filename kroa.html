@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Kroatisch Master v1.9.1</title>
+<title>Kroatisch Master v1.9.2</title>
 <style>
 :root { --hr-blue: #002395; --bg: #f0f2f5; --red: #ff4444; --green: #28a745; --gold: #f39c12; }
 body { font-family: sans-serif; background: var(--bg); display: flex; flex-direction: column; align-items: center; padding: 10px; margin: 0; }
@@ -27,33 +27,26 @@ input, select { width: 100%; padding: 12px; border: 2px solid #ddd; border-radiu
 .flash-active { background: #000 !important; color: #fff !important; }
 .flash-hr { font-size: 2.2rem; font-weight: 900; color: var(--hr-blue); }
 #solutionDisplay { display: none; color: var(--red); text-align: center; font-weight: bold; margin: 10px 0; background: #fff0f0; padding: 15px; border-radius: 8px; border: 1px solid var(--red); font-size: 1.1rem; }
-.rescue-link { font-size: 0.7rem; color: blue; text-decoration: underline; cursor: pointer; display: block; text-align: center; margin-top: 10px; }
 </style>
 </head>
 <body>
 
 <div class="card">
 <h2>1. Eingabe &amp; Check</h2>
-<input type="text" id="hrIn" placeholder="Kroatisch (z.B. Vidimo se)">
-<input type="text" id="deIn" placeholder="Deutsch (z.B. Bis dann)">
+<input type="text" id="hrIn" placeholder="Kroatisch">
+<input type="text" id="deIn" placeholder="Deutsch">
 <select id="catIn">
 <option value="Allgemein">Allgemein</option>
 <option value="Phrasen">Phrasen / Sätze</option>
 <option value="Zahlen/Tage">Zahlen &amp; Tage</option>
-<option value="Essen/Trinken">Essen &amp; Trinken</option>
-<option value="Verben">Verben</option>
 </select>
 <div class="btn-group">
 <button type="button" id="btnCheck" class="btn btn-check">🔍 CHECK</button>
 <button type="button" id="btnSave" class="btn btn-add">SPEICHERN</button>
 </div>
-
 <div id="voice-status" style="font-size:0.7rem; margin-bottom:8px; color: #888;">Stimme wird gesucht...</div>
 <div class="dict-toggle-btn" id="tBtnLabel">WÖRTERBUCH ANZEIGEN</div>
-<div id="dictContent">
-<div id="dictionaryList" class="dict-list"></div>
-<span class="rescue-link" id="btnRescue">Daten-Rettung erzwingen</span>
-</div>
+<div id="dictContent"><div id="dictionaryList" class="dict-list"></div></div>
 </div>
 
 <div class="card" id="trainArea" style="display:none;">
@@ -78,19 +71,15 @@ input, select { width: 100%; padding: 12px; border: 2px solid #ddd; border-radiu
 <script>
 var STORAGE_KEY = 'kroatisch_master_final_v1';
 var daten = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-var currentItem = null;
-var currentQuestionMode = ""
-var isLocked = false;
-var flashInterval = null;
-var hrVoice = null;
+var currentItem = null, currentQuestionMode = "", isLocked = false, flashInterval = null, hrVoice = null;
 
 function initVoices() {
 if (!window.speechSynthesis) return;
 var v = window.speechSynthesis.getVoices();
-hrVoice = v.find(v => v.lang.includes('hr'));
+hrVoice = v.find(x => x.lang.includes('hr'));
 var el = document.getElementById('voice-status');
-if(hrVoice) { el.innerText = "✓ Stimme: " + hrVoice.name; el.style.color="green" }
-else { el.innerText = "⚠ Nur Standard-Stimme" }
+if(hrVoice) { el.innerText = "✓ Stimme aktiv" el.style.color="green" }
+else { el.innerText = "⚠ Suche läuft/Standard..." }
 }
 
 function speakHr(text) {
@@ -103,34 +92,30 @@ msg.rate = 0.85;
 window.speechSynthesis.speak(msg);
 }
 
+// Verbesserte Check-Funktion
 function onlineCheck() {
 var word = document.getElementById('hrIn').value.trim();
-if (!word) { alert("Bitte erst ein Wort oder eine Phrase eingeben."); return; }
-// Öffnet Glosbe mit dem korrekten Suchbegriff
+if (!word) { alert("Bitte kroatisches Wort eingeben"); return; }
 var url = "https://glosbe.com/hr/de/" + encodeURIComponent(word);
-window.open(url, '_blank');
+// Versuch 1: Direktes Öffnen
+var win = window.open(url, '_blank');
+// Falls Browser blockiert:
+if(!win || win.closed || typeof win.closed=='undefined') {
+alert("Pop-up blockiert! Bitte erlaube Pop-ups für diese Seite oder klicke den Link manuell.");
+}
 }
 
 function renderList() {
 var list = document.getElementById('dictionaryList');
 if (daten.length === 0) { list.innerHTML = "Leer" return; }
 var html = ""
-var sortierte = daten.slice().sort((a,b) => (a.cat||"Allgemein").localeCompare(b.cat||"Allgemein") || a.hr.localeCompare(b.hr));
-var lastCat = ""
-sortierte.forEach((item) => {
-if (item.cat !== lastCat) {
-html += `<div class="cat-head">${(item.cat || "Allgemein").toUpperCase()}</div>`;
-lastCat = item.cat;
-}
-var realIdx = daten.findIndex(d => d.hr === item.hr && d.de === item.de);
-html += `<div class="entry"><span onclick="speakHr('${item.hr}')"><b>${item.hr}</b> - ${item.de} 🔊</span><span class="del-btn" onclick="deleteEntry(${realIdx})">❌</span></div>`;
+daten.sort((a,b) => (a.cat||"").localeCompare(b.cat||"") || a.hr.localeCompare(b.hr)).forEach((item, i) => {
+html += `<div class="entry"><span onclick="speakHr('${item.hr}')"><b>${item.hr}</b> - ${item.de} 🔊</span><span class="del-btn" onclick="deleteEntry(${i})">❌</span></div>`;
 });
 list.innerHTML = html;
 }
 
-function deleteEntry(i) {
-if (confirm("Löschen?")) { daten.splice(i, 1); localStorage.setItem(STORAGE_KEY, JSON.stringify(daten)); renderList(); }
-}
+function deleteEntry(i) { if (confirm("Löschen?")) { daten.splice(i, 1); localStorage.setItem(STORAGE_KEY, JSON.stringify(daten)); renderList(); } }
 
 function saveWort() {
 var h = document.getElementById('hrIn').value.trim(), d = document.getElementById('deIn').value.trim(), c = document.getElementById('catIn').value;
@@ -155,10 +140,10 @@ document.getElementById('answer').focus();
 function handleWrong() {
 isLocked = true;
 var sol = currentQuestionMode === "hr" ? currentItem.hr : currentItem.de;
-document.getElementById('solutionDisplay').innerHTML = "Lösung:<br>" + sol;
+document.getElementById('solutionDisplay').innerHTML = "Lösung: " + sol;
 document.getElementById('solutionDisplay').style.display = 'block';
 if (currentQuestionMode === "hr") speakHr(currentItem.hr);
-setTimeout(() => { isLocked = false; document.getElementById('answer').disabled = false; document.getElementById('answer').focus(); }, 2500);
+setTimeout(() => { isLocked = false; document.getElementById('answer').disabled = false; document.getElementById('answer').focus(); }, 2000);
 }
 
 function checkInput() {
@@ -172,7 +157,6 @@ setTimeout(nextQuestion, 800);
 } else { handleWrong(); }
 }
 
-// Event Listeners
 document.getElementById('btnSave').onclick = saveWort;
 document.getElementById('btnCheck').onclick = onlineCheck;
 document.getElementById('tBtnLabel').onclick = () => {
@@ -193,8 +177,12 @@ document.getElementById('fDe').innerText = r.de;
 };
 document.getElementById('stopBtn').onclick = () => { clearInterval(flashInterval); document.getElementById('sBtn').style.display='block'; document.getElementById('stopBtn').style.display='none'; };
 
+// Sprach-Lader
+if (window.speechSynthesis.onvoiceschanged !== undefined) {
 window.speechSynthesis.onvoiceschanged = initVoices;
+}
 initVoices();
+
 if (daten.length > 0) { document.getElementById('trainArea').style.display = 'block'; nextQuestion(); }
 </script>
 </body>
