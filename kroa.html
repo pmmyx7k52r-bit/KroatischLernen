@@ -3,280 +3,226 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Kroatisch Master v3.0.0</title>
+<title>Kroatisch Master v3.5.2</title>
 <style>
 :root { --hr-blue: #002395; --bg: #f4f7f6; --red: #ff4444; --green: #28a745; --gold: #f39c12; }
 body { font-family: -apple-system, sans-serif; background: var(--bg); display: flex; flex-direction: column; align-items: center; padding: 10px; margin: 0; }
 .card { max-width: 500px; width: 100%; background: white; padding: 20px; border-radius: 18px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); margin-bottom: 12px; box-sizing: border-box; }
-h2 { color: var(--hr-blue); font-size: 0.85rem; margin: 0 0 12px 0; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid #eee; padding-bottom: 5px; }
-input, select { width: 100%; padding: 14px; border: 2px solid #edf2f7; border-radius: 10px; margin-bottom: 10px; box-sizing: border-box; font-size: 1rem; outline: none; transition: border 0.2s; }
-input:focus { border-color: var(--hr-blue); }
+h2 { color: var(--hr-blue); font-size: 0.85rem; margin: 0 0 12px 0; text-transform: uppercase; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+input, select { width: 100%; padding: 14px; border: 2px solid #edf2f7; border-radius: 10px; margin-bottom: 10px; box-sizing: border-box; font-size: 1rem; outline: none; }
 .btn-group { display: flex; gap: 8px; margin-bottom: 10px; }
-.btn { padding: 14px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; color: white; font-size: 1rem; flex: 1; transition: opacity 0.2s; }
-.btn:active { opacity: 0.7; }
+.btn { padding: 14px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; color: white; font-size: 1rem; flex: 1; }
 .btn-add { background: var(--hr-blue); flex: 2; }
 .btn-check { background: var(--gold); }
 .btn-flash { background: #1a202c; width: 100%; }
 .btn-stop { background: var(--red); display: none; width: 100%; }
 .dict-toggle-btn { background: #edf2f7; color: #4a5568; padding: 12px; border-radius: 10px; text-align: center; cursor: pointer; font-weight: bold; width: 100%; border: 1px solid #e2e8f0; }
 #dictContent { display: none; margin-top: 12px; width: 100%; }
-.cat-head { background: #f7fafc; padding: 8px; font-weight: bold; font-size: 0.75rem; margin-top: 15px; border-radius: 6px; color: #718096; border-left: 4px solid var(--hr-blue); }
-.entry { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #edf2f7; font-size: 0.95rem; }
-.lvl-tag { font-size: 0.65rem; padding: 3px 7px; border-radius: 12px; background: #ebf8ff; color: #3182ce; font-weight: bold; margin-left: 8px; }
-.del-btn { color: #a0aec0; cursor: pointer; padding: 8px; font-size: 1rem; }
-.flash-box { height: 160px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
-.flash-hr { font-size: 2.4rem; font-weight: 800; color: var(--hr-blue); margin-bottom: 4px; }
-#solutionDisplay { display: none; color: var(--red); text-align: center; font-weight: bold; margin: 12px 0; background: #fff5f5; padding: 18px; border-radius: 12px; border: 1px solid #feb2b2; }
-.stats-row { display: flex; justify-content: space-between; font-size: 0.75rem; color: #718096; margin-bottom: 10px; }
+.entry { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #edf2f7; }
+.lvl-tag { font-size: 0.65rem; padding: 3px 7px; border-radius: 12px; background: #ebf8ff; color: #3182ce; font-weight: bold; }
+#solutionDisplay { display: none; color: var(--red); text-align: center; font-weight: bold; margin: 12px 0; background: #fff5f5; padding: 15px; border-radius: 12px; border: 1px solid #feb2b2; }
 </style>
 </head>
 <body>
 
 <div class="card">
 <h2>1. Neuer Eintrag</h2>
-<input type="text" id="hrIn" placeholder="Kroatisch (z.B. Sladoled)">
-<input type="text" id="deIn" placeholder="Deutsch (z.B. Eis)">
+<input type="text" id="hrIn" placeholder="Kroatisch">
+<input type="text" id="deIn" placeholder="Deutsch">
 <select id="catIn">
 <option value="Allgemein">Allgemein</option>
 <option value="Phrasen">Phrasen</option>
-<option value="Urlaub">Urlaub</option>
+<option value="Essen">Essen & Trinken</option>
+<option value="Zahlen">Zahlen</option>
+<option value="Tage">Tage & Zeit</option>
 </select>
 <div class="btn-group">
-<button type="button" id="btnCheck" class="btn btn-check">&#x1F50D; CHECK</button>
+<button type="button" id="btnCheck" class="btn btn-check">🔍 CHECK</button>
 <button type="button" id="btnSave" class="btn btn-add">SPEICHERN</button>
 </div>
-<div id="voice-status" style="font-size:0.7rem; color: #a0aec0;">Initialisiere Audio...</div>
 </div>
 
 <div class="card" id="trainArea" style="display:none;">
-<div class="stats-row">
+<div style="display:flex; justify-content:space-between; font-size:0.75rem; color:#718096; margin-bottom:10px;">
 <span>TRAINING</span>
 <span id="trainStats">Lvl 0</span>
 </div>
 <div id="question" style="font-size:1.6rem; text-align:center; font-weight:800; margin:15px 0;"></div>
 <div id="solutionDisplay"></div>
-<input type="text" id="answer" placeholder="Antwort eingeben..." autocomplete="off">
+<input type="text" id="answer" placeholder="Antwort..." autocomplete="off">
 <div id="feedback" style="text-align:center; height:24px; font-weight:bold; color: var(--green);"></div>
-<button type="button" class="btn" style="background:#718096; margin-top:10px;" id="btnHint">WEISS ICH NICHT</button>
+<button type="button" class="btn" style="background:#718096; margin-top:10px; width:100%;" id="btnHint">WEISS ICH NICHT</button>
 </div>
 
 <div class="card">
-<div class="dict-toggle-btn" id="tBtnLabel">W\u00d6RTERBUCH ANZEIGEN</div>
+<div class="dict-toggle-btn" id="tBtnLabel">WÖRTERBUCH ANZEIGEN</div>
 <div id="dictContent"><div id="dictionaryList"></div></div>
 </div>
 
 <div class="card">
 <h2>3. Flash-Modus</h2>
-<div class="flash-box">
-<div id="fHr" class="flash-hr">START</div>
-<div id="fDe" style="color:#718096; font-size: 1.1rem;">bereit</div>
+<div class="flash-box" style="text-align:center; padding: 20px 0;">
+<div id="fHr" style="font-size:2rem; font-weight:800; color:var(--hr-blue);">START</div>
+<div id="fDe" style="color:#718096;">bereit</div>
 </div>
-<button type="button" id="sBtn" class="btn btn-flash">START (AUDIO)</button>
+<button type="button" id="sBtn" class="btn btn-flash">START</button>
 <button type="button" id="stopBtn" class="btn btn-stop">STOPP</button>
 </div>
 
 <script>
-var STORAGE_KEY = 'kroatisch_master_v3_0';
+var STORAGE_KEY = 'kroatisch_master_v3_5_2';
 var daten = (JSON.parse(localStorage.getItem(STORAGE_KEY)) || []).map(function(x) {
-  return { hr: x.hr, de: x.de, cat: x.cat || "Allgemein", lvl: x.lvl || 0 };
+return { hr: x.hr, de: x.de, cat: x.cat || "Allgemein", lvl: x.lvl || 0 };
 });
 
 var currentItem = null;
-var currentMode = "";
+var currentMode = ""
 var isLocked = false;
 var flashInterval = null;
-var hrVoice = null;
-
-// --- AUDIO SYSTEM ---
-function initVoices() {
-  var loadVoices = function() {
-    hrVoice = speechSynthesis.getVoices().find(function(v) { return v.lang.toLowerCase().includes('hr'); });
-    var el = document.getElementById('voice-status');
-    if (hrVoice) {
-      el.innerText = "\u2713 Kroatisch (HD) aktiv";
-      el.style.color = "var(--green)";
-    } else {
-      el.innerText = "Audio: System-Stimme";
-    }
-  };
-  loadVoices();
-  speechSynthesis.onvoiceschanged = loadVoices;
-}
 
 function speakHr(text) {
-  if (!window.speechSynthesis || speechSynthesis.speaking) { return; }
-  var msg = new SpeechSynthesisUtterance(text);
-  if (hrVoice) { msg.voice = hrVoice; }
-  msg.lang = 'hr-HR';
-  msg.rate = 0.85;
-  speechSynthesis.speak(msg);
+if (!window.speechSynthesis) return;
+window.speechSynthesis.cancel();
+var msg = new SpeechSynthesisUtterance(text);
+msg.lang = 'hr-HR';
+msg.rate = 0.85;
+window.speechSynthesis.speak(msg);
 }
 
-// --- LOGIK ---
 function normalize(str) {
-  return str.toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\u0111/g, "d");
+return str.toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d");
 }
 
 function saveWort() {
-  var h = document.getElementById('hrIn').value.trim();
-  var d = document.getElementById('deIn').value.trim();
-  if (!h || !d) { return; }
+var h = document.getElementById('hrIn').value.trim();
+var d = document.getElementById('deIn').value.trim();
+if (!h || !d) return;
 
-  if (daten.some(function(x) { return normalize(x.hr) === normalize(h); })) {
-    alert("Dieses Wort existiert bereits!");
-    return;
-  }
-
-  daten.push({ hr: h, de: d, cat: document.getElementById('catIn').value, lvl: 0 });
-  save();
-  document.getElementById('hrIn').value = "";
-  document.getElementById('deIn').value = "";
-  renderList();
-  checkUI();
+if (daten.some(function(x) { return normalize(x.hr) === normalize(h); })) {
+alert("Wort existiert bereits!");
+return;
 }
 
-function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(daten)); }
+daten.push({ hr: h, de: d, cat: document.getElementById('catIn').value, lvl: 0 });
+save();
+document.getElementById('hrIn').value = ""
+document.getElementById('deIn').value = ""
+renderList();
+checkUI();
+}
 
-// --- RENDERER ---
+function save() {
+localStorage.setItem(STORAGE_KEY, JSON.stringify(daten));
+}
+
 function renderList() {
-  var list = document.getElementById('dictionaryList');
-  if (!daten.length) {
-    list.innerHTML = "Leer";
-    return;
-  }
-  var grouped = daten.reduce(function(acc, item) {
-    if (!acc[item.cat]) { acc[item.cat] = []; }
-    acc[item.cat].push(item);
-    return acc;
-  }, {});
-
-  var html = "";
-  for (var cat in grouped) {
-    html += '<div class="cat-head">' + cat.toUpperCase() + '</div>';
-    grouped[cat].forEach(function(item) {
-      html += '<div class="entry">' +
-        '<span class="clickable-hr" data-hr="' + encodeURIComponent(item.hr) + '">' +
-        '<b>' + item.hr + '</b> - ' + item.de +
-        ' <span class="lvl-tag">Lvl ' + item.lvl + '</span> \uD83D\uDD0A' +
-        '</span>' +
-        '<span class="del-btn" data-idx="' + daten.indexOf(item) + '">\u274C</span>' +
-        '</div>';
-    });
-  }
-  list.innerHTML = html;
+var list = document.getElementById('dictionaryList');
+if (!daten.length) { list.innerHTML = "Leer" return; }
+var html = ""
+for (var i = 0; i < daten.length; i++) {
+var item = daten[i];
+html += '<div class="entry">' +
+'<span class="clickable" data-hr="' + encodeURIComponent(item.hr) + '"><b>' + item.hr + '</b> - ' + item.de + ' <span class="lvl-tag">' + item.cat + ' | Lvl ' + item.lvl + '</span></span>' +
+'<span style="color:red; cursor:pointer;" data-idx="' + i + '" class="del-btn">❌</span>' +
+'</div>';
+}
+list.innerHTML = html;
 }
 
-// --- TRAINING (Leitner-Light) ---
 function nextQuestion() {
-  if (!daten.length) { return; }
-  isLocked = false;
-  document.getElementById('solutionDisplay').style.display = 'none';
-  document.getElementById('feedback').innerText = "";
+if (!daten.length) return;
+isLocked = false;
+document.getElementById('solutionDisplay').style.display = 'none';
+document.getElementById('feedback').innerText = ""
 
-  var pool = [];
-  daten.forEach(function(item) {
-    if (item.lvl >= 5 && Math.random() > 0.1) { return; }
-    var weight = Math.pow(2, 5 - item.lvl);
-    for (var i = 0; i < weight; i++) { pool.push(item); }
-  });
-
-  currentItem = pool.length ? pool[Math.floor(Math.random() * pool.length)] : daten[0];
-  currentMode = Math.random() > 0.5 ? "hr" : "de";
-  document.getElementById('question').innerText = currentMode === "hr" ? currentItem.de : currentItem.hr;
-  document.getElementById('trainStats').innerText = "Level " + currentItem.lvl;
-  document.getElementById('answer').value = "";
-  document.getElementById('answer').focus();
+var pool = [];
+for (var i = 0; i < daten.length; i++) {
+var weight = Math.pow(2, 5 - daten[i].lvl);
+for (var j = 0; j < weight; j++) { pool.push(daten[i]); }
 }
 
-function updateLvl(success) {
-  if (success) {
-    if (currentItem.lvl < 5) { currentItem.lvl++; }
-  } else {
-    currentItem.lvl = Math.max(0, currentItem.lvl - 2);
-  }
-  save();
+currentItem = pool[Math.floor(Math.random() * pool.length)];
+currentMode = Math.random() > 0.5 ? "hr" : "de"
+document.getElementById('question').innerText = currentMode === "hr" ? currentItem.de : currentItem.hr;
+document.getElementById('trainStats').innerText = "Level " + currentItem.lvl;
+document.getElementById('answer').value = ""
 }
 
 function handleWrong() {
-  isLocked = true;
-  updateLvl(false);
-  var sol = currentMode === "hr" ? currentItem.hr : currentItem.de;
-  var sd = document.getElementById('solutionDisplay');
-  sd.innerHTML = 'L\u00f6sung:<br><span style="font-size:1.4rem">' + sol + '</span>';
-  sd.style.display = 'block';
-  if (currentMode === "hr") { speakHr(currentItem.hr); }
-  setTimeout(nextQuestion, 2800);
+isLocked = true;
+currentItem.lvl = Math.max(0, currentItem.lvl - 1);
+save();
+var sol = currentMode === "hr" ? currentItem.hr : currentItem.de;
+document.getElementById('solutionDisplay').innerText = "Lösung: " + sol;
+document.getElementById('solutionDisplay').style.display = 'block';
+if (currentMode === "hr") speakHr(currentItem.hr);
+setTimeout(nextQuestion, 2500);
 }
 
-// --- EVENTS ---
 document.addEventListener("click", function(e) {
-  var speakEl = e.target.closest(".clickable-hr");
-  if (speakEl) { speakHr(decodeURIComponent(speakEl.dataset.hr)); }
-
-  var delEl = e.target.closest(".del-btn");
-  if (delEl && confirm("L\u00f6schen?")) {
-    daten.splice(parseInt(delEl.dataset.idx), 1);
-    save();
-    renderList();
-    checkUI();
-  }
+var clickEl = e.target.closest(".clickable");
+if (clickEl) {
+speakHr(decodeURIComponent(clickEl.dataset.hr));
+}
+var delEl = e.target.closest(".del-btn");
+if (delEl && confirm("Löschen?")) {
+daten.splice(parseInt(delEl.dataset.idx), 1);
+save(); renderList(); checkUI();
+}
 });
 
 document.getElementById('btnSave').onclick = saveWort;
-
 document.getElementById('btnCheck').onclick = function() {
-  var w = document.getElementById('hrIn').value.trim();
-  if (w) { window.location.href = 'https://glosbe.com/hr/de/' + encodeURIComponent(w); }
+var w = document.getElementById('hrIn').value.trim();
+if (w) window.location.href = 'https://glosbe.com/hr/de/' + encodeURIComponent(w);
 };
 
 document.getElementById('tBtnLabel').onclick = function() {
-  var c = document.getElementById('dictContent');
-  c.style.display = c.style.display === 'block' ? 'none' : 'block';
-  if (c.style.display === 'block') { renderList(); }
+var c = document.getElementById('dictContent');
+c.style.display = (c.style.display === 'block') ? 'none' : 'block';
+if (c.style.display === 'block') renderList();
+};
+
+document.getElementById('answer').onkeypress = function(e) {
+if (e.key === 'Enter' && !isLocked) {
+var cor = currentMode === "hr" ? currentItem.hr : currentItem.de;
+if (normalize(document.getElementById('answer').value) === normalize(cor)) {
+currentItem.lvl = Math.min(5, currentItem.lvl + 1);
+save();
+if (currentMode === "hr") speakHr(currentItem.hr);
+document.getElementById('feedback').innerText = "✓ Richtig!"
+setTimeout(nextQuestion, 900);
+} else {
+handleWrong();
+}
+}
 };
 
 document.getElementById('btnHint').onclick = handleWrong;
 
-document.getElementById('answer').onkeypress = function(e) {
-  if (e.key === 'Enter' && !isLocked) {
-    var cor = currentMode === "hr" ? currentItem.hr : currentItem.de;
-    if (normalize(document.getElementById('answer').value) === normalize(cor)) {
-      updateLvl(true);
-      if (currentMode === "hr") { speakHr(currentItem.hr); }
-      document.getElementById('feedback').innerText = "\u2713 Gut gemacht!";
-      setTimeout(nextQuestion, 900);
-    } else {
-      handleWrong();
-    }
-  }
-};
-
-// --- FLASH ---
 document.getElementById('sBtn').onclick = function() {
-  if (!daten.length) { return; }
-  document.getElementById('sBtn').style.display = 'none';
-  document.getElementById('stopBtn').style.display = 'block';
-  flashInterval = setInterval(function() {
-    var r = daten[Math.floor(Math.random() * daten.length)];
-    var m = Math.random() > 0.5 ? "hr" : "de";
-    document.getElementById('fHr').innerText = m === "hr" ? r.hr : r.de;
-    document.getElementById('fDe').innerText = m === "hr" ? r.de : r.hr;
-    speakHr(r.hr);
-  }, 2200);
+if (!daten.length) return;
+document.getElementById('sBtn').style.display = 'none';
+document.getElementById('stopBtn').style.display = 'block';
+flashInterval = setInterval(function() {
+var r = daten[Math.floor(Math.random() * daten.length)];
+document.getElementById('fHr').innerText = r.hr;
+document.getElementById('fDe').innerText = r.de;
+speakHr(r.hr);
+}, 2200);
 };
 
 document.getElementById('stopBtn').onclick = function() {
-  clearInterval(flashInterval);
-  document.getElementById('sBtn').style.display = 'block';
-  document.getElementById('stopBtn').style.display = 'none';
+clearInterval(flashInterval);
+document.getElementById('sBtn').style.display = 'block';
+document.getElementById('stopBtn').style.display = 'none';
 };
 
 function checkUI() {
-  document.getElementById('trainArea').style.display = daten.length ? 'block' : 'none';
-  if (daten.length && !currentItem) { nextQuestion(); }
+document.getElementById('trainArea').style.display = daten.length ? 'block' : 'none';
+if (daten.length && !currentItem) nextQuestion();
 }
 
-initVoices();
 checkUI();
 </script>
 </body>
