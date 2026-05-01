@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Kroatisch Master v3.6.5</title>
+<title>Kroatisch Master v3.6.7</title>
 <style>
 :root { --hr-blue: #002395; --bg: #f4f7f6; --red: #ff4444; --green: #28a745; --gold: #f39c12; }
 body { font-family: -apple-system, sans-serif; background: var(--bg); display: flex; flex-direction: column; align-items: center; padding: 10px; margin: 0; }
@@ -56,10 +56,10 @@ input, select { width: 100%; padding: 14px; border: 2px solid #edf2f7; border-ra
 </div>
 
 <div class="card">
-<h2>3. Flash-Modus</h2>
-<div id="fHr" style="font-size:2rem; font-weight:800; color:var(--hr-blue); text-align:center;">START</div>
-<div id="fDe" style="color:#718096; text-align:center; margin-bottom:15px;">Unterbewusstsein aktiv</div>
-<button type="button" id="sBtn" class="btn btn-flash">START (1.2s)</button>
+<h2>3. Flash-Modus (Ultra-Subliminal)</h2>
+<div id="fHr" style="font-size:2rem; font-weight:800; color:var(--hr-blue); text-align:center;">BEREIT</div>
+<div id="fDe" style="color:#718096; text-align:center; margin-bottom:15px;">Frequenz: 0.06s</div>
+<button type="button" id="sBtn" class="btn btn-flash">START ULTRA-SPEED</button>
 <button type="button" id="stopBtn" class="btn btn-stop">STOPP</button>
 </div>
 
@@ -99,21 +99,16 @@ checkUI();
 function renderList() {
 var list = document.getElementById('dictionaryList');
 var html = ""
-// Gruppierung der Daten nach Kategorien
 var groups = {};
 daten.forEach(item => {
 if (!groups[item.cat]) groups[item.cat] = [];
 groups[item.cat].push(item);
 });
-
-// Sortierung der Kategorien und Wörter
 var sortedCats = Object.keys(groups).sort();
 sortedCats.forEach(cat => {
 html += '<div class="cat-header">' + cat + '</div>';
-// Innerhalb der Kategorie alphabetisch sortieren
 groups[cat].sort((a, b) => a.hr.localeCompare(b.hr));
 groups[cat].forEach(item => {
-// Index im Haupt-Array finden für Löschfunktion
 var originalIdx = daten.indexOf(item);
 html += '<div class="entry"><span><b>' + item.hr + '</b> - ' + item.de + '</span>' +
 '<div class="entry-actions">' +
@@ -180,6 +175,7 @@ setTimeout(nextQuestion, 2500);
 
 document.getElementById('btnHint').onclick = handleWrong;
 
+// Ultra-High-Speed Flash Modus (0.06 Sekunden)
 document.getElementById('sBtn').onclick = function() {
 if (!daten.length) return;
 document.getElementById('sBtn').style.display = 'none';
@@ -188,8 +184,7 @@ flashInterval = setInterval(function() {
 var r = daten[Math.floor(Math.random() * daten.length)];
 document.getElementById('fHr').innerText = r.hr;
 document.getElementById('fDe').innerText = r.de;
-speakHr(r.hr);
-}, 1200);
+}, 60);
 };
 
 document.getElementById('stopBtn').onclick = function() {
