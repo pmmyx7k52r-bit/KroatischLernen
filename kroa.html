@@ -3,12 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Kroatisch Master v3.6.3</title>
+<title>Kroatisch Master v3.6.5</title>
 <style>
 :root { --hr-blue: #002395; --bg: #f4f7f6; --red: #ff4444; --green: #28a745; --gold: #f39c12; }
 body { font-family: -apple-system, sans-serif; background: var(--bg); display: flex; flex-direction: column; align-items: center; padding: 10px; margin: 0; }
 .card { max-width: 500px; width: 100%; background: white; padding: 20px; border-radius: 18px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); margin-bottom: 12px; box-sizing: border-box; }
 h2 { color: var(--hr-blue); font-size: 0.85rem; margin: 0 0 12px 0; text-transform: uppercase; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+.cat-header { background: #edf2f7; padding: 6px 12px; border-radius: 6px; font-size: 0.75rem; font-weight: bold; color: #4a5568; margin: 15px 0 5px 0; text-transform: uppercase; }
 input, select { width: 100%; padding: 14px; border: 2px solid #edf2f7; border-radius: 10px; margin-bottom: 10px; box-sizing: border-box; font-size: 1rem; outline: none; }
 .btn-group { display: flex; gap: 8px; margin-bottom: 10px; }
 .btn { padding: 14px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; color: white; font-size: 1rem; flex: 1; -webkit-tap-highlight-color: transparent; }
@@ -18,7 +19,9 @@ input, select { width: 100%; padding: 14px; border: 2px solid #edf2f7; border-ra
 .btn-stop { background: var(--red); display: none; width: 100%; }
 .dict-toggle-btn { background: #edf2f7; color: #4a5568; padding: 12px; border-radius: 10px; text-align: center; cursor: pointer; font-weight: bold; width: 100%; border: 1px solid #e2e8f0; }
 #dictContent { display: none; margin-top: 12px; width: 100%; }
-.entry { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #edf2f7; }
+.entry { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f7fafc; }
+.entry-actions { display: flex; gap: 15px; align-items: center; }
+.speak-icon { cursor: pointer; font-size: 1.2rem; }
 #solutionDisplay { display: none; color: var(--red); text-align: center; font-weight: bold; margin: 12px 0; background: #fff5f5; padding: 15px; border-radius: 12px; border: 1px solid #feb2b2; }
 </style>
 </head>
@@ -61,7 +64,6 @@ input, select { width: 100%; padding: 14px; border: 2px solid #edf2f7; border-ra
 </div>
 
 <script>
-// Beständiger Speichername für deinen Vokabel-Katalog
 var STORAGE_KEY = 'KroatischMaster_Catalog';
 var daten = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
 var currentItem = null;
@@ -86,8 +88,8 @@ function saveWort() {
 var h = document.getElementById('hrIn').value.trim();
 var d = document.getElementById('deIn').value.trim();
 if (!h || !d) return;
-daten.push({ hr: h, de: d, cat: document.getElementById('catIn').value, lvl: 0 });
-localStorage.setItem(STORAGE_KEY, JSON.stringify(daten)); // Katalog bleibt nach Restart
+daten.push({ hr: h, de: d, cat: document.getElementById('catIn').value });
+localStorage.setItem(STORAGE_KEY, JSON.stringify(daten));
 document.getElementById('hrIn').value = ""
 document.getElementById('deIn').value = ""
 renderList();
@@ -97,9 +99,29 @@ checkUI();
 function renderList() {
 var list = document.getElementById('dictionaryList');
 var html = ""
-for (var i = 0; i < daten.length; i++) {
-html += '<div class="entry"><span><b>' + daten[i].hr + '</b> - ' + daten[i].de + '</span><span onclick="del(' + i + ')">❌</span></div>';
-}
+// Gruppierung der Daten nach Kategorien
+var groups = {};
+daten.forEach(item => {
+if (!groups[item.cat]) groups[item.cat] = [];
+groups[item.cat].push(item);
+});
+
+// Sortierung der Kategorien und Wörter
+var sortedCats = Object.keys(groups).sort();
+sortedCats.forEach(cat => {
+html += '<div class="cat-header">' + cat + '</div>';
+// Innerhalb der Kategorie alphabetisch sortieren
+groups[cat].sort((a, b) => a.hr.localeCompare(b.hr));
+groups[cat].forEach(item => {
+// Index im Haupt-Array finden für Löschfunktion
+var originalIdx = daten.indexOf(item);
+html += '<div class="entry"><span><b>' + item.hr + '</b> - ' + item.de + '</span>' +
+'<div class="entry-actions">' +
+'<span class="speak-icon" onclick="speakHr(\'' + item.hr.replace(/'/g, "\\'") + '\')">🔊</span>' +
+'<span onclick="del(' + originalIdx + ')" style="cursor:pointer;">❌</span>' +
+'</div></div>';
+});
+});
 list.innerHTML = html || "Leer"
 }
 
@@ -158,7 +180,6 @@ setTimeout(nextQuestion, 2500);
 
 document.getElementById('btnHint').onclick = handleWrong;
 
-// Flash-Modus auf 1.2 Sekunden für das Unterbewusstsein
 document.getElementById('sBtn').onclick = function() {
 if (!daten.length) return;
 document.getElementById('sBtn').style.display = 'none';
