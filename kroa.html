@@ -3,30 +3,37 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Kroatisch Master v3.6.7</title>
+<title>Kroatisch Master v3.6.8</title>
 <style>
-:root { --hr-blue: #002395; --bg: #f4f7f6; --red: #ff4444; --green: #28a745; --gold: #f39c12; }
+:root { --hr-blue: #002395; --bg: #f4f7f6; --red: #ff4444; --green: #28a745; --gold: #f39c12; --dark: #1a202c; }
 body { font-family: -apple-system, sans-serif; background: var(--bg); display: flex; flex-direction: column; align-items: center; padding: 10px; margin: 0; }
 .card { max-width: 500px; width: 100%; background: white; padding: 20px; border-radius: 18px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); margin-bottom: 12px; box-sizing: border-box; }
 h2 { color: var(--hr-blue); font-size: 0.85rem; margin: 0 0 12px 0; text-transform: uppercase; border-bottom: 1px solid #eee; padding-bottom: 5px; }
 .cat-header { background: #edf2f7; padding: 6px 12px; border-radius: 6px; font-size: 0.75rem; font-weight: bold; color: #4a5568; margin: 15px 0 5px 0; text-transform: uppercase; }
 input, select { width: 100%; padding: 14px; border: 2px solid #edf2f7; border-radius: 10px; margin-bottom: 10px; box-sizing: border-box; font-size: 1rem; outline: none; }
 .btn-group { display: flex; gap: 8px; margin-bottom: 10px; }
-.btn { padding: 14px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; color: white; font-size: 1rem; flex: 1; -webkit-tap-highlight-color: transparent; }
+.btn { padding: 14px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; color: white; font-size: 1rem; flex: 1; -webkit-tap-highlight-color: transparent; transition: opacity 0.2s; }
+.btn:active { opacity: 0.8; }
 .btn-add { background: var(--hr-blue); flex: 2; }
 .btn-check { background: var(--gold); }
-.btn-flash { background: #1a202c; width: 100%; }
+.btn-mode { background: white; color: var(--dark); border: 2px solid var(--dark); margin-top: 10px; width: 100%; }
+.btn-flash-start { background: var(--dark); width: 100%; }
+.btn-back { background: #718096; width: 100%; margin-top: 20px; }
 .btn-stop { background: var(--red); display: none; width: 100%; }
-.dict-toggle-btn { background: #edf2f7; color: #4a5568; padding: 12px; border-radius: 10px; text-align: center; cursor: pointer; font-weight: bold; width: 100%; border: 1px solid #e2e8f0; }
+.dict-toggle-btn { background: #edf2f7; color: #4a5568; padding: 12px; border-radius: 10px; text-align: center; cursor: pointer; font-weight: bold; width: 100%; border: 1px solid #e2e8f0; margin-top: 10px; }
 #dictContent { display: none; margin-top: 12px; width: 100%; }
 .entry { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f7fafc; }
 .entry-actions { display: flex; gap: 15px; align-items: center; }
 .speak-icon { cursor: pointer; font-size: 1.2rem; }
 #solutionDisplay { display: none; color: var(--red); text-align: center; font-weight: bold; margin: 12px 0; background: #fff5f5; padding: 15px; border-radius: 12px; border: 1px solid #feb2b2; }
+.view { display: none; width: 100%; max-width: 500px; }
+.active-view { display: block; }
 </style>
 </head>
 <body>
 
+<!-- 1. STARTSEITE: ERFASSUNG -->
+<div id="viewMain" class="view active-view">
 <div class="card">
 <h2>1. Neuer Eintrag</h2>
 <input type="text" id="hrIn" placeholder="Kroatisch">
@@ -46,21 +53,36 @@ input, select { width: 100%; padding: 14px; border: 2px solid #edf2f7; border-ra
 <div id="dictContent"><div id="dictionaryList"></div></div>
 </div>
 
-<div class="card" id="trainArea" style="display:none;">
+<div class="card">
+<h2>Modus wählen</h2>
+<button class="btn btn-mode" onclick="showView('viewTrain')">🎓 TRAINING STARTEN</button>
+<button class="btn btn-mode" onclick="showView('viewFlash')">⚡ FLASH-MODUS (0.06s)</button>
+</div>
+</div>
+
+<!-- 2. TRAINING ANSICHT -->
+<div id="viewTrain" class="view">
+<div class="card">
 <h2>2. Training</h2>
 <div id="question" style="font-size:1.6rem; text-align:center; font-weight:800; margin:15px 0;"></div>
 <div id="solutionDisplay"></div>
 <input type="text" id="answer" placeholder="Antwort..." autocomplete="off">
 <div id="feedback" style="text-align:center; height:24px; font-weight:bold; color: var(--green);"></div>
 <button type="button" class="btn" style="background:#718096; margin-top:10px; width:100%;" id="btnHint">WEISS ICH NICHT</button>
+<button class="btn btn-back" onclick="showView('viewMain')">⬅ ZURÜCK</button>
+</div>
 </div>
 
+<!-- 3. FLASH ANSICHT -->
+<div id="viewFlash" class="view">
 <div class="card">
-<h2>3. Flash-Modus (Ultra-Subliminal)</h2>
+<h2>3. Flash-Modus (Ultra-Speed)</h2>
 <div id="fHr" style="font-size:2rem; font-weight:800; color:var(--hr-blue); text-align:center;">BEREIT</div>
 <div id="fDe" style="color:#718096; text-align:center; margin-bottom:15px;">Frequenz: 0.06s</div>
-<button type="button" id="sBtn" class="btn btn-flash">START ULTRA-SPEED</button>
+<button type="button" id="sBtn" class="btn btn-flash-start">START ULTRA-SPEED</button>
 <button type="button" id="stopBtn" class="btn btn-stop">STOPP</button>
+<button class="btn btn-back" id="flashBack" onclick="stopFlash(); showView('viewMain')">⬅ ZURÜCK</button>
+</div>
 </div>
 
 <script>
@@ -70,6 +92,13 @@ var currentItem = null;
 var currentMode = ""
 var isLocked = false;
 var flashInterval = null;
+
+// View Management
+function showView(viewId) {
+document.querySelectorAll('.view').forEach(v => v.classList.remove('active-view'));
+document.getElementById(viewId).classList.add('active-view');
+if(viewId === 'viewTrain') nextQuestion();
+}
 
 function speakHr(text) {
 if (!window.speechSynthesis) return;
@@ -93,7 +122,6 @@ localStorage.setItem(STORAGE_KEY, JSON.stringify(daten));
 document.getElementById('hrIn').value = ""
 document.getElementById('deIn').value = ""
 renderList();
-checkUI();
 }
 
 function renderList() {
@@ -124,12 +152,16 @@ window.del = function(idx) {
 if(confirm("Löschen?")) {
 daten.splice(idx, 1);
 localStorage.setItem(STORAGE_KEY, JSON.stringify(daten));
-renderList(); checkUI();
+renderList();
 }
 };
 
 function nextQuestion() {
-if (!daten.length) return;
+if (!daten.length) {
+alert("Bitte zuerst Wörter speichern!");
+showView('viewMain');
+return;
+}
 isLocked = false;
 document.getElementById('solutionDisplay').style.display = 'none';
 document.getElementById('feedback').innerText = ""
@@ -137,6 +169,7 @@ currentItem = daten[Math.floor(Math.random() * daten.length)];
 currentMode = Math.random() > 0.5 ? "hr" : "de"
 document.getElementById('question').innerText = currentMode === "hr" ? currentItem.de : currentItem.hr;
 document.getElementById('answer').value = ""
+document.getElementById('answer').focus();
 }
 
 document.getElementById('btnSave').onclick = saveWort;
@@ -175,7 +208,6 @@ setTimeout(nextQuestion, 2500);
 
 document.getElementById('btnHint').onclick = handleWrong;
 
-// Ultra-High-Speed Flash Modus (0.06 Sekunden)
 document.getElementById('sBtn').onclick = function() {
 if (!daten.length) return;
 document.getElementById('sBtn').style.display = 'none';
@@ -187,18 +219,16 @@ document.getElementById('fDe').innerText = r.de;
 }, 60);
 };
 
-document.getElementById('stopBtn').onclick = function() {
+function stopFlash() {
 clearInterval(flashInterval);
 document.getElementById('sBtn').style.display = 'block';
 document.getElementById('stopBtn').style.display = 'none';
-};
-
-function checkUI() {
-document.getElementById('trainArea').style.display = daten.length ? 'block' : 'none';
-if (daten.length && !currentItem) nextQuestion();
 }
 
-checkUI();
+document.getElementById('stopBtn').onclick = stopFlash;
+
+// Initialisierung
+renderList();
 </script>
 </body>
 </html>
